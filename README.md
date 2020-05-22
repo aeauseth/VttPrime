@@ -4,7 +4,7 @@ Virtual Table Top for Role Playing games (web based)
 Created by Aaron Auseth
 
 This is a proof of concept at the moment.  My goal is to reproduce [Maptools](https://www.rptools.net/) as a web client.  
-Along the way incorporate some of the fatures of [Roll20](https://roll20.net/) and [Fantasy Grounds](https://www.fantasygrounds.com/).
+Along the way incorporate some of the fetures of [Roll20](https://roll20.net/) and [Fantasy Grounds](https://www.fantasygrounds.com/).
 
 This is a good opportunity for me to improve my programming skills and learn the latest web frameworks and workflows (VUE, GitHut, AWS, ECMAScript 6, etc).
 
