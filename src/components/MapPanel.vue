@@ -7,7 +7,7 @@
       id='listLayers'
       dense
     >
-      <v-list-item-group v-model="layersSelectedIndex">
+      <v-list-item-group v-model="layersSelectedIndex" mandatory>
         <v-list-item-title id="listLayersTitle" 
         class="indigo darken-2 text-center white--text" >
            
@@ -34,6 +34,7 @@
           <v-list-item
             v-for="(item, i) in layersZindex"
             :key="i"
+            
           >
             
             <v-btn icon color="indigo">
@@ -464,7 +465,9 @@ export default {
       // Layers Z index (used to sort layers)
       layersContainer.children.forEach( e => {
         this.layersZindex.splice(this.layersZindex, 0, e);
+        e.interactiveChildren = false;  // default to no interaction
       });
+      this.layersZindex[0].interactiveChildren = true;  // top layer (likely token) is active layer
 
       // Handlers
       stage.interactive = true;
@@ -488,6 +491,10 @@ export default {
 
       if (!this.app.stage.overlayContainer) return;
       if (!e) return;
+      
+      // Skip if any mouse button is down
+      if (e.data.originalEvent.buttons > 0) return;
+
       // if (!e && this.namePlate) {
       //   let textElement = this.namePlate.children[1];
       //   textElement.style.fontSize = (2 * 1 / this.app.stage.scale.x).toFixed(2) + "em";
@@ -564,7 +571,12 @@ export default {
 
     },
 
-    SpriteMouseOut() {
+    SpriteMouseOut(e) {
+
+      // Skip if any mouse button is down
+      if (e.data.originalEvent.buttons > 0) return;
+
+      // hide namePlate
       if (this.app.stage.overlayContainer.namePlate)
       {
       this.app.stage.overlayContainer.namePlate.visible = false;
@@ -755,9 +767,16 @@ export default {
             this.prevMousePosition.x = pos.x;
             this.prevMousePosition.y = pos.y;
             this.SelectedSpriteResize();
-            if (this.namePlate)
+            
+            // Position Nameplate
+            if (this.app.stage.overlayContainer.namePlate)
             {
-              this.namePlate.visible = false;
+              if (this.app.stage.overlayContainer.namePlate.sprite)
+              {
+                let textElement = this.app.stage.overlayContainer.namePlate.children[1];
+                this.app.stage.overlayContainer.namePlate.x = this.app.stage.overlayContainer.namePlate.sprite.x +this.app.stage.overlayContainer.namePlate.sprite.width / 2 - textElement.width /2;
+                this.app.stage.overlayContainer.namePlate.y = this.app.stage.overlayContainer.namePlate.sprite.y + this.app.stage.overlayContainer.namePlate.sprite.height + 2;
+              }
             }
           }
         }
@@ -1050,7 +1069,7 @@ export default {
     }
 
     ,layersSelectedIndex(n, o) {
-      if (n == undefined) return;
+      if (n == undefined || o == undefined) return;
       console.log("layersSelectedIndex", n, o);
       this.DeselectSprite(this.selectedSprite);
       this.layersZindex.forEach( (e, i) => {

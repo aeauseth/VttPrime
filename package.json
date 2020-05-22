@@ -1,11 +1,12 @@
 {
-  "name": "battlemapvue1",
+  "name": "vttprime",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "deploy": "aws s3 sync ./dist s3://vttprime"
   },
   "dependencies": {
     "@pixi/filter-drop-shadow": "^3.1.1",
@@ -24,6 +25,7 @@
     "@vue/cli-plugin-eslint": "~4.3.0",
     "@vue/cli-service": "~4.3.0",
     "babel-eslint": "^10.1.0",
+    "compression-webpack-plugin": "^4.0.0",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^6.2.2",
     "sass": "^1.19.0",
