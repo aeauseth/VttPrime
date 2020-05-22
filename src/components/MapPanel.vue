@@ -39,7 +39,7 @@
             
             <v-btn icon color="indigo">
             <v-icon v-if="item.visible" title="click to hide layer"
-            @click="item.visible = false"
+            @click="item.visible = false; DeselectSprite(selectedSprite)"
             size="small"
             dense
             >
@@ -1035,7 +1035,7 @@ export default {
 
   watch: {
     layersZindex(n, o)  {
-      console.log("layersZindex", n, o);
+      //console.log("layersZindex", n, o);
       // PIXI draws from back [index 0] to front.
       // KLUGE: Layer list show from top most layer to bottom most layer [index 0]
       if (!this.layersZindex) return;
@@ -1062,15 +1062,13 @@ export default {
               that.layersSelectedIndex = i;
             }
           }
-          
         }
-        
       });
     }
 
     ,layersSelectedIndex(n, o) {
       if (n == undefined || o == undefined) return;
-      console.log("layersSelectedIndex", n, o);
+      //console.log("layersSelectedIndex", n, o);
       this.DeselectSprite(this.selectedSprite);
       this.layersZindex.forEach( (e, i) => {
         let child = this.layers[e.name];
