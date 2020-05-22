@@ -3,7 +3,7 @@ Virtual Table Top for Role Playing games (web based)
 
 Created by Aaron Auseth
 
-This is a proof of concept at the moment.  My goal is to reproduce (reverse engineer) [Maptools](https://www.rptools.net/) as a web client.  I' aware that [Maptools is opensource](https://github.com/RPTools/maptool) and built in Java.
+This is a proof of concept at the moment.  My goal is to reproduce (reverse engineer) [Maptools](https://www.rptools.net/) as a web client.  I' aware that [Maptool is opensource](https://github.com/RPTools/maptool) and built in Java.  I may actually refer to Maptool source code when I get stuck.
 
 Along the way I'd like to incorporate some of the features of [Roll20](https://roll20.net/) and [Fantasy Grounds](https://www.fantasygrounds.com/).  Stretch goal of reworking the macro language to be javascript-ish.
 
