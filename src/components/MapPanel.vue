@@ -1078,11 +1078,11 @@ export default {
         if (i == n)
         {
           child.interactiveChildren = true;
-          console.log("+", child.name);
+          //console.log("+", child.name);
         } else
         {
           child.interactiveChildren = false;
-          console.log("-", child.name);
+          //console.log("-", child.name);
         }
       });
     },
