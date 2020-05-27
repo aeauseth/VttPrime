@@ -97,7 +97,9 @@
 
 import * as MAZE from '../js/maze.js'
 
+
 import * as PIXI from 'pixi.js';
+import * as SPRITEADORNER from '../js/spriteAdorner.js'
 
 // REF: https://pixijs.io/pixi-filters/docs/index.html
 import {DropShadowFilter} from '@pixi/filter-drop-shadow';
@@ -592,7 +594,7 @@ export default {
         // Ignore if not part of selected layer
         if(e.target.parent.name != this.layersZindex[this.layersSelectedIndex].name) return;
         this.SelectSprite(e.target);
-        //e.stopPropagation();
+        e.stopPropagation();
       }
     },
 
@@ -602,17 +604,25 @@ export default {
 
     SelectSprite(sprite) {
       //console.log("SelectSprite", sprite.name, sprite);
+
       if (this.selectedSprite)
       {
-        this.DeselectSprite(sprite);
+        // Do nothing if same sprite is selected again
+        if (this.selectedSprite.id == sprite.id) return true;
+
+        // Otherwise deselect current selected sprite
+        this.DeselectSprite(this.selectedSprite);
       }
+
       this.selectedSprite = sprite;
+      window.selectedSprite = sprite;
       sprite.selected = true;
+      SPRITEADORNER.createAdorner(sprite, this.app.stage.overlayContainer);
 
       window.sprite = sprite;
 
       //this.app.stage.overlayContainer.visible = true;
-      this.SelectedSpriteResize();
+      //this.SelectedSpriteResize();
 
       this.updateDiag();
 
@@ -624,15 +634,18 @@ export default {
       //console.log("DeslectSprite", sprite.name, sprite);
       if (!sprite) return;
 
+
+      SPRITEADORNER.deleteAdorner(sprite);
       sprite.selected = false;
       this.selectedSprite = null;
-      this.app.stage.overlayContainer.boundingBox.visible = false;
+      //this.app.stage.overlayContainer.boundingBox.visible = false;
 
+      window.selectedSprite = null;
       this.updateDiag();
       
     },
 
-    SelectedSpriteResize() {
+    _SelectedSpriteResize() {
       var sprite = this.selectedSprite;
       if (!sprite) {
         return;
@@ -702,18 +715,18 @@ export default {
       if (e.data.originalEvent.buttons == 1) {
         if (this.selectedSprite) {
           //console.log("stageMouseDownEventHandler", this.selectedSprite);
-          if (!this.selectedSprite.selected) {
+          //if (!this.selectedSprite.selected) {
             this.DeselectSprite(this.selectedSprite);
-          }
+          //}
          
         }
       }
     },
 
     stageMouseUpEventHandler() {
-      if (this.selectedSprite) {
-        this.selectedSprite.selected = false;
-      }
+      // if (this.selectedSprite) {
+      //   this.selectedSprite.selected = false;
+      // }
       return true;
     },
 
@@ -766,7 +779,12 @@ export default {
             }
             this.prevMousePosition.x = pos.x;
             this.prevMousePosition.y = pos.y;
-            this.SelectedSpriteResize();
+            //this.SelectedSpriteResize();
+            if (this.selectedSprite)
+            {
+              //this.selectedSprite.OnMove(this.selectedSprite);
+              this.selectedSprite.__OnMove();
+            }
             
             // Position Nameplate
             if (this.app.stage.overlayContainer.namePlate)
@@ -805,61 +823,61 @@ export default {
 
     },
     
-    CreateMap_Bunnies5x5rot () {
-      console.log("Creating new map: Bunnies5x5rot");
-      this.ResetPixi();
+    // CreateMap_Bunnies5x5rot () {
+    //   console.log("Creating new map: Bunnies5x5rot");
+    //   this.ResetPixi();
 
-      const container = new PIXI.Container();
-      this.app.stage.addChild(container);
+    //   const container = new PIXI.Container();
+    //   this.app.stage.addChild(container);
 
-      // Create a 5x5 grid of bunnieshttps://
-      const texture = PIXI.Texture.from("https://pixijs.io/examples/examples/assets/bunny.png");
+    //   // Create a 5x5 grid of bunnieshttps://
+    //   const texture = PIXI.Texture.from("https://pixijs.io/examples/examples/assets/bunny.png");
 
-      // Create a 5x5 grid of bunnies
-      for (let i = 0; i < 25; i++) {
-          const bunny = new PIXI.Sprite(texture);
-          bunny.anchor.set(0.5);
-          bunny.x = (i % 5) * 40;
-          bunny.y = Math.floor(i / 5) * 40;
-          container.addChild(bunny);
-      }
+    //   // Create a 5x5 grid of bunnies
+    //   for (let i = 0; i < 25; i++) {
+    //       const bunny = new PIXI.Sprite(texture);
+    //       bunny.anchor.set(0.5);
+    //       bunny.x = (i % 5) * 40;
+    //       bunny.y = Math.floor(i / 5) * 40;
+    //       container.addChild(bunny);
+    //   }
 
-      // bounding box
-      const rect = new PIXI.Graphics();
-      rect.lineStyle(2, 0xFF0000);
-      const bb = container.getBounds();
-      rect.drawRect(bb.x, bb.y, bb.width, bb.height);
-      rect.visible = this.ToolBarStatus["ShowAllBounding"].active;
-      rect.bb = true;
-      container.addChild(rect);
+    //   // bounding box
+    //   const rect = new PIXI.Graphics();
+    //   rect.lineStyle(2, 0xFF0000);
+    //   const bb = container.getBounds();
+    //   rect.drawRect(bb.x, bb.y, bb.width, bb.height);
+    //   rect.visible = this.ToolBarStatus["ShowAllBounding"].active;
+    //   rect.bb = true;
+    //   container.addChild(rect);
 
-      // Move container to the center
-      container.x = this.app.screen.width / 2;
-      container.y = this.app.screen.height / 2;
+    //   // Move container to the center
+    //   container.x = this.app.screen.width / 2;
+    //   container.y = this.app.screen.height / 2;
 
-      // Center bunny sprite in local container coordinates
-      container.pivot.x = container.width / 2;
-      container.pivot.y = container.height / 2;
-
-      
+    //   // Center bunny sprite in local container coordinates
+    //   container.pivot.x = container.width / 2;
+    //   container.pivot.y = container.height / 2;
 
       
 
+      
 
 
-      // Listen for animate update
-      let t = (delta) => {
-        // rotate the container!
-        //use delta to create frame-independent transform
-        container.rotation -= 0.01 * delta;
-      };
-      //this.tickers.push( t);
-      //console.log(t);
-      this.app.ticker.add(t);
 
-      this.updateDiag();
+    //   // Listen for animate update
+    //   let t = (delta) => {
+    //     // rotate the container!
+    //     //use delta to create frame-independent transform
+    //     container.rotation -= 0.01 * delta;
+    //   };
+    //   //this.tickers.push( t);
+    //   //console.log(t);
+    //   this.app.ticker.add(t);
 
-    },
+    //   this.updateDiag();
+
+    // },
 
     // DoAction(action) {
     //   console.log("DoAction", action);
@@ -966,7 +984,8 @@ export default {
       stage.scale.x = newScale.x;
       stage.scale.y = newScale.y;
       //updateGrid();
-      this.SelectedSpriteResize();
+      //this.SelectedSpriteResize();
+      this.selectedSprite.__OnMove(true);
       // drawVbl();
       //drawVP();
       this.stageResize();
