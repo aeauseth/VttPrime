@@ -472,22 +472,73 @@ export default {
       this.layersZindex[0].interactiveChildren = true;  // top layer (likely token) is active layer
 
       // Handlers
-      stage.interactive = true;
-      stage.on("mousemove", this.stageMouseMoveEventHandler);
-      stage.on("mousedown", this.stageMouseDownEventHandler);
-      stage.on("mouseup", this.stageMouseUpEventHandler);
+      // stage.interactive = true;
+      // stage.on("mousemove", this.stageMouseMoveEventHandler);
+      // stage.on("mousedown", this.stageMouseDownEventHandler);
+      // stage.on("mouseup", this.stageMouseUpEventHandler);
 
       
     },
 
     AddSpriteHandlers(sprite) {
+      // sprite.interactive = true;
+      // sprite.buttonMode = true;
+      // sprite.on("mousedown", this.SpriteMouseDown);
+      // sprite.on("mouseup", this.SpriteMouseUp);
+      // sprite.on("mouseover", this.SpriteMouseOver);
+      // sprite.on("mouseout", this.SpriteMouseOut);
+
       sprite.interactive = true;
-      sprite.buttonMode = true;
-      sprite.on("mousedown", this.SpriteMouseDown);
-      sprite.on("mouseup", this.SpriteMouseUp);
-      sprite.on("mouseover", this.SpriteMouseOver);
-      sprite.on("mouseout", this.SpriteMouseOut);
+      sprite.on("mousedown", this.onDragStart)
+      sprite.on("mouseup", this.onDragEnd);
+      sprite.on("mouseupoutside", this.onDragEnd);
+      sprite.on("mousemove", this.onDragMove);
+      sprite.cursor = "pointer";
+
     },
+
+    onDragStart(e) {
+      let sprite = e.currentTarget;
+      
+
+      // store a reference to the mouse data
+      sprite.data = e.data;
+
+      // update UI
+      sprite.cursor = "grabbing";
+      sprite.addAdorner();
+      sprite.dragging = true;
+
+      // store where we clicked within the sprite (dragOffset)
+      sprite.data.dragOffset = e.data.getLocalPosition(sprite.parent);
+      sprite.data.dragOffset.x = sprite.data.dragOffset.x - sprite.x;
+      sprite.data.dragOffset.y = sprite.data.dragOffset.y - sprite.y;
+
+      //console.log("onDragStart", sprite, e.data, sprite.dragOffset);
+
+    },
+
+    onDragEnd(e) {
+      let sprite = e.currentTarget;
+
+      sprite.cursor = "pointer";
+      sprite.dragging = false;
+      //sprite.DestroyAdorner();
+
+      // set the interaction data to null
+      sprite.data = null;
+    },
+
+    onDragMove(e) {
+      let sprite = e.currentTarget;
+      if (sprite.dragging)
+      {
+          var newPosition = sprite.data.getLocalPosition(sprite.parent);
+          sprite.position.x = newPosition.x - sprite.data.dragOffset.x;
+          sprite.position.y = newPosition.y - sprite.data.dragOffset.y;
+      }
+    },
+
 
     SpriteMouseOver(e) {
 
@@ -591,15 +642,29 @@ export default {
       // We are only concered with left clicks
       if (e.data.originalEvent.buttons == 1) {
 
+        if (e.target.name == 'resizeHandle')
+        {
+          this.selectedHandle = e.target;
+          e.stopPropagation();
+          return;
+        }
+
+        this.selectedHandle = null;
+
         // Ignore if not part of selected layer
         if(e.target.parent.name != this.layersZindex[this.layersSelectedIndex].name) return;
         this.SelectSprite(e.target);
+        e.target.cursor = "grabbing";
         e.stopPropagation();
       }
     },
 
     SpriteMouseUp(e) {
       this.SpriteMouseOver(e);
+      if (this.selectedSprite)
+      {
+        this.selectedSprite.cursor = "grab";
+      }
     },
 
     SelectSprite(sprite) {
@@ -617,6 +682,7 @@ export default {
       this.selectedSprite = sprite;
       window.selectedSprite = sprite;
       sprite.selected = true;
+      sprite.cursor = "grab";
       SPRITEADORNER.createAdorner(sprite, this.app.stage.overlayContainer);
 
       window.sprite = sprite;
@@ -637,6 +703,7 @@ export default {
 
       SPRITEADORNER.deleteAdorner(sprite);
       sprite.selected = false;
+      sprite.cursor = "pointer";
       this.selectedSprite = null;
       //this.app.stage.overlayContainer.boundingBox.visible = false;
 
@@ -714,8 +781,7 @@ export default {
       // We are only concered with left clicks
       if (e.data.originalEvent.buttons == 1) {
         if (this.selectedSprite) {
-          //console.log("stageMouseDownEventHandler", this.selectedSprite);
-          //if (!this.selectedSprite.selected) {
+            if (e.target.name == 'resizeHandle') return;  // ignore resize handle
             this.DeselectSprite(this.selectedSprite);
           //}
          
@@ -724,9 +790,9 @@ export default {
     },
 
     stageMouseUpEventHandler() {
-      // if (this.selectedSprite) {
-      //   this.selectedSprite.selected = false;
-      // }
+      if (this.selectedSprite) {
+        this.selectedSprite.cursor = "grab";
+      }
       return true;
     },
 
@@ -767,6 +833,17 @@ export default {
 
       if (e.data.originalEvent.buttons == 1) {
         //console.log(e.data.originalEvent.buttons, selectedEntity);
+
+        console.log(this.selectedHandle.name);
+        // Check for resize handle
+        if (this.selectedHandle)
+        {
+          console.log(this.selectedHandle.name);
+          e.stopPropagation();
+          return;
+        }
+
+        // Check for selected sprite
         if (this.selectedSprite) {
           if (this.selectedSprite.selected) {
             let pos = e.data.global;
@@ -779,12 +856,10 @@ export default {
             }
             this.prevMousePosition.x = pos.x;
             this.prevMousePosition.y = pos.y;
-            //this.SelectedSpriteResize();
-            if (this.selectedSprite)
-            {
-              //this.selectedSprite.OnMove(this.selectedSprite);
-              this.selectedSprite.__OnMove();
-            }
+
+            this.selectedSprite.cursor = "grabbing";
+            this.selectedSprite.__OnMove();
+            
             
             // Position Nameplate
             if (this.app.stage.overlayContainer.namePlate)
@@ -985,7 +1060,7 @@ export default {
       stage.scale.y = newScale.y;
       //updateGrid();
       //this.SelectedSpriteResize();
-      this.selectedSprite.__OnMove(true);
+      //this.selectedSprite.__OnMove(true);
       // drawVbl();
       //drawVP();
       this.stageResize();
