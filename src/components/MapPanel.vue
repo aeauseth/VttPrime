@@ -39,7 +39,7 @@
             
             <v-btn icon color="indigo">
             <v-icon v-if="item.visible" title="click to hide layer"
-            @click="item.visible = false; DeselectSprite(selectedSprite)"
+            @click="item.visible = false; DeselectAllSprites()"
             size="small"
             dense
             >
@@ -257,7 +257,7 @@ export default {
       {
         //console.log("resize", width, height);
         this.app.renderer.resize(width, height);
-        this.stageResize();
+        this.$nextTick(this.stageResize);
       }
       
     },
@@ -489,15 +489,20 @@ export default {
       // sprite.on("mouseout", this.SpriteMouseOut);
 
       sprite.interactive = true;
-      sprite.on("mousedown", this.onDragStart)
-      sprite.on("mouseup", this.onDragEnd);
-      sprite.on("mouseupoutside", this.onDragEnd);
-      sprite.on("mousemove", this.onDragMove);
+      sprite.on("mousedown", this.onSpriteStart)
+      sprite.on("mouseup", this.onSpriteEnd);
+      sprite.on("mouseupoutside", this.onSpriteEnd);
+      sprite.on("mousemove", this.onSpriteMove);
+      sprite.on("mouseover", this.onSpriteOver);
       sprite.cursor = "pointer";
 
     },
 
-    onDragStart(e) {
+    onSpriteOver(e) {
+
+    },
+
+    onSpriteStart(e) {
       let sprite = e.currentTarget;
       
 
@@ -524,7 +529,7 @@ export default {
       e.stopPropagation();
     },
 
-    onDragEnd(e) {
+    onSpriteEnd(e) {
       let sprite = e.currentTarget;
 
       sprite.cursor = "pointer";
@@ -536,19 +541,28 @@ export default {
       e.stopPropagation();
     },
 
-    onDragMove(e) {
+    onSpriteMove(e) {
       let sprite = e.currentTarget;
       if (sprite.dragging)
       {
           var newPosition = sprite.data.getLocalPosition(sprite.parent);
-          sprite.position.x = newPosition.x - sprite.data.dragOffset.x;
-          sprite.position.y = newPosition.y - sprite.data.dragOffset.y;
+
+          let x = newPosition.x - sprite.data.dragOffset.x;
+          let y = newPosition.y - sprite.data.dragOffset.y;
+					// Hold CTRL key to snap to grid
+					if (e.data.originalEvent.ctrlKey) {
+						x = Math.round(x / 50)*50;
+						y = Math.round(y / 50)*50;
+          }
+          
+          sprite.position.x = x;
+          sprite.position.y = y;
           e.stopPropagation();
       }
     },
 
 
-    SpriteMouseOver(e) {
+    _SpriteMouseOver(e) {
 
       if (!this.app.stage.overlayContainer) return;
       if (!e) return;
@@ -632,7 +646,7 @@ export default {
 
     },
 
-    SpriteMouseOut(e) {
+    _SpriteMouseOut(e) {
 
       // Skip if any mouse button is down
       if (e.data.originalEvent.buttons > 0) return;
@@ -646,136 +660,143 @@ export default {
       //this.SelectedSpriteResize();
     },
     
-    SpriteMouseDown(e) {
-      // We are only concered with left clicks
-      if (e.data.originalEvent.buttons == 1) {
+    // _SpriteMouseDown(e) {
+    //   // We are only concered with left clicks
+    //   if (e.data.originalEvent.buttons == 1) {
 
 
-        this.selectedHandle = null;
+    //     this.selectedHandle = null;
 
-        // Ignore if not part of selected layer
-        if(e.target.parent.name != this.layersZindex[this.layersSelectedIndex].name) return;
-        this.SelectSprite(e.target);
-        e.target.cursor = "grabbing";
-        e.stopPropagation();
-      }
-    },
+    //     // Ignore if not part of selected layer
+    //     if(e.target.parent.name != this.layersZindex[this.layersSelectedIndex].name) return;
+    //     this.SelectSprite(e.target);
+    //     e.target.cursor = "grabbing";
+    //     e.stopPropagation();
+    //   }
+    // },
 
-    SpriteMouseUp(e) {
-      this.SpriteMouseOver(e);
-      if (this.selectedSprite)
-      {
-        this.selectedSprite.cursor = "grab";
-      }
-    },
+    // _SpriteMouseUp(e) {
+    //   this.SpriteMouseOver(e);
+    //   if (this.selectedSprite)
+    //   {
+    //     this.selectedSprite.cursor = "grab";
+    //   }
+    // },
 
-    SelectSprite(sprite) {
-      //console.log("SelectSprite", sprite.name, sprite);
+    // _SelectSprite(sprite) {
+    //   //console.log("SelectSprite", sprite.name, sprite);
 
-      if (this.selectedSprite)
-      {
-        // Do nothing if same sprite is selected again
-        if (this.selectedSprite.id == sprite.id) return true;
+    //   if (this.selectedSprite)
+    //   {
+    //     // Do nothing if same sprite is selected again
+    //     if (this.selectedSprite.id == sprite.id) return true;
 
-        // Otherwise deselect current selected sprite
-        this.DeselectSprite(this.selectedSprite);
-      }
+    //     // Otherwise deselect current selected sprite
+    //     this.DeselectSprite(this.selectedSprite);
+    //   }
 
-      this.selectedSprite = sprite;
-      window.selectedSprite = sprite;
-      sprite.selected = true;
-      sprite.cursor = "grab";
-      SPRITEADORNER.createAdorner(sprite, this.app.stage.overlayContainer);
+    //   this.selectedSprite = sprite;
+    //   window.selectedSprite = sprite;
+    //   sprite.selected = true;
+    //   sprite.cursor = "grab";
+    //   SPRITEADORNER.createAdorner(sprite, this.app.stage.overlayContainer);
 
-      window.sprite = sprite;
+    //   window.sprite = sprite;
 
-      //this.app.stage.overlayContainer.visible = true;
-      //this.SelectedSpriteResize();
+    //   //this.app.stage.overlayContainer.visible = true;
+    //   //this.SelectedSpriteResize();
 
-      this.updateDiag();
+    //   this.updateDiag();
 
-      return true;
-    },
+    //   return true;
+    // },
 
-    DeselectSprite(sprite) {
+    // _DeselectSprite(sprite) {
 
-      //console.log("DeslectSprite", sprite.name, sprite);
-      if (!sprite) return;
+    //   //console.log("DeslectSprite", sprite.name, sprite);
+    //   if (!sprite) return;
 
 
-      SPRITEADORNER.deleteAdorner(sprite);
-      sprite.selected = false;
-      sprite.cursor = "pointer";
-      this.selectedSprite = null;
-      //this.app.stage.overlayContainer.boundingBox.visible = false;
+    //   SPRITEADORNER.deleteAdorner(sprite);
+    //   sprite.selected = false;
+    //   sprite.cursor = "pointer";
+    //   this.selectedSprite = null;
+    //   //this.app.stage.overlayContainer.boundingBox.visible = false;
 
-      window.selectedSprite = null;
-      this.updateDiag();
+    //   window.selectedSprite = null;
+    //   this.updateDiag();
       
+    // },
+    DeselectAllSprites() {
+      if (window.stage.selectedItems.length > 0)
+      {
+        window.stage.selectedItems[0].removeAdorner();
+        window.stage.selectedItems = [];
+      }
     },
 
-    _SelectedSpriteResize() {
-      var sprite = this.selectedSprite;
-      if (!sprite) {
-        return;
-      }
+    // _SelectedSpriteResize() {
+    //   var sprite = this.selectedSprite;
+    //   if (!sprite) {
+    //     return;
+    //   }
 
-      // Determine bounds of sprite
-      var bounds = {};
-      bounds.width = sprite.width;
-      bounds.height = sprite.height;
-      bounds.x = sprite.x - sprite.anchor.x * bounds.width;
-      bounds.y = sprite.y - sprite.anchor.y * bounds.height;
+    //   // Determine bounds of sprite
+    //   var bounds = {};
+    //   bounds.width = sprite.width;
+    //   bounds.height = sprite.height;
+    //   bounds.x = sprite.x - sprite.anchor.x * bounds.width;
+    //   bounds.y = sprite.y - sprite.anchor.y * bounds.height;
 
-      // TODO: We might be able to reuse this overlay if scale & rotation are the same
+    //   // TODO: We might be able to reuse this overlay if scale & rotation are the same
       
-      // Remove any previous overlays
-      // this.app.stage.overlayContainer.children.forEach( child => {
-      //   child.destroy();
-      // });
-      // this.app.stage.overlayContainer.removeChildren();
+    //   // Remove any previous overlays
+    //   // this.app.stage.overlayContainer.children.forEach( child => {
+    //   //   child.destroy();
+    //   // });
+    //   // this.app.stage.overlayContainer.removeChildren();
 
-      // Draw boundingbox overlay
-      let stage = this.app.stage;
+    //   // Draw boundingbox overlay
+    //   let stage = this.app.stage;
  
-      var boundingBox = this.app.stage.overlayContainer.boundingBox;
-      if (!boundingBox) 
-      {
-        boundingBox = this.app.stage.overlayContainer.boundingBox = this.app.stage.overlayContainer.addChild(new PIXI.Container());
-      }
-      boundingBox.visible = true;
+    //   var boundingBox = this.app.stage.overlayContainer.boundingBox;
+    //   if (!boundingBox) 
+    //   {
+    //     boundingBox = this.app.stage.overlayContainer.boundingBox = this.app.stage.overlayContainer.addChild(new PIXI.Container());
+    //   }
+    //   boundingBox.visible = true;
 
-      if (boundingBox.visible)
-      {
+    //   if (boundingBox.visible)
+    //   {
 
-        // Red Line
-        let solidRect = boundingBox.children[0];
-        if (!solidRect) solidRect = boundingBox.addChild(new PIXI.Graphics());
-        solidRect.clear();
-        solidRect.lineStyle(3 / stage.scale.x, 0x800000, 1);
-        solidRect.drawRect(0, 0, sprite.width, sprite.height);
-        solidRect.x = sprite.x;
-        solidRect.y = sprite.y;
-        solidRect.filters = [new DropShadowFilter()];
+    //     // Red Line
+    //     let solidRect = boundingBox.children[0];
+    //     if (!solidRect) solidRect = boundingBox.addChild(new PIXI.Graphics());
+    //     solidRect.clear();
+    //     solidRect.lineStyle(3 / stage.scale.x, 0x800000, 1);
+    //     solidRect.drawRect(0, 0, sprite.width, sprite.height);
+    //     solidRect.x = sprite.x;
+    //     solidRect.y = sprite.y;
+    //     solidRect.filters = [new DropShadowFilter()];
 
-        // drawDashedPolygon (white)
-        let dashRect = boundingBox.children[1];
-        if (!dashRect) dashRect = boundingBox.addChild(new PIXI.Graphics());
-        dashRect.clear();
-        dashRect.lineStyle(2 / stage.scale.x, 0xffffff, 1);
-        let polygons = [];
-        polygons.push({ x: 0, y: 0 });
-        polygons.push({ x: sprite.width, y: 0 });
-        polygons.push({ x: sprite.width, y: sprite.height });
-        polygons.push({ x: 0, y: sprite.height });
-        var step = 5 / stage.scale.x;
-        dashRect.drawDashedPolygon(polygons, 0, 0, 0, step, step * 1.5, 0);
-        dashRect.x = sprite.x;
-        dashRect.y = sprite.y;
-      }
+    //     // drawDashedPolygon (white)
+    //     let dashRect = boundingBox.children[1];
+    //     if (!dashRect) dashRect = boundingBox.addChild(new PIXI.Graphics());
+    //     dashRect.clear();
+    //     dashRect.lineStyle(2 / stage.scale.x, 0xffffff, 1);
+    //     let polygons = [];
+    //     polygons.push({ x: 0, y: 0 });
+    //     polygons.push({ x: sprite.width, y: 0 });
+    //     polygons.push({ x: sprite.width, y: sprite.height });
+    //     polygons.push({ x: 0, y: sprite.height });
+    //     var step = 5 / stage.scale.x;
+    //     dashRect.drawDashedPolygon(polygons, 0, 0, 0, step, step * 1.5, 0);
+    //     dashRect.x = sprite.x;
+    //     dashRect.y = sprite.y;
+    //   }
 
-      this.updateDiag();
-    },
+    //   this.updateDiag();
+    // },
 
     stageMouseDownEventHandler(e) {
       //console.log("stageMouseDownEventHandler", e, this.selectedSprite);
@@ -787,17 +808,13 @@ export default {
         //    this.DeselectSprite(this.selectedSprite);
           //}
         //console.log("mousedown");
-      if (window.stage.selectedItems.length > 0)
-      {
-        window.stage.selectedItems[0].removeAdorner();
-        window.stage.selectedItems = [];
-      }
+      this.DeselectAllSprites();
          
         //}
       }
     },
 
-    stageMouseUpEventHandler() {
+    _stageMouseUpEventHandler() {
       if (this.selectedSprite) {
         this.selectedSprite.cursor = "grab";
       }
@@ -902,7 +919,7 @@ export default {
           x: this.app.stage.scale.x,
           y: this.app.stage.scale.y };
       }
-      this.SpriteMouseOver();
+      //this.SpriteMouseOver();
 
     },
     
@@ -1149,7 +1166,7 @@ export default {
       let stage = this.app.stage;
       if (!stage.layersContainer) return;
 
-      this.DeselectSprite(this.selectedSprite);
+      this.DeselectAllSprites();
 
       
 
@@ -1175,7 +1192,7 @@ export default {
     ,layersSelectedIndex(n, o) {
       if (n == undefined || o == undefined) return;
       //console.log("layersSelectedIndex", n, o);
-      this.DeselectSprite(this.selectedSprite);
+      this.DeselectAllSprites();
       this.layersZindex.forEach( (e, i) => {
         let child = this.layers[e.name];
         //let index = this.layersZindex.length - i -1;

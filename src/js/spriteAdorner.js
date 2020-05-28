@@ -230,15 +230,31 @@ function onResizeMove(e)
           resizer.position.x = newPosition.x - resizer.data.dragOffset.x;
 					resizer.position.y = newPosition.y - resizer.data.dragOffset.y;
 
+					let width = resizer.position.x + 0;
+					let height = resizer.position.y + 0;
+
+					// Hold SHIFT key to keep height/width ratio
+					if (e.data.originalEvent.shiftKey) {
+						let ratio = resizer.sprite._texture.height / resizer.sprite._texture.width;
+						//console.log(resizer.sprite);
+						height = width * ratio;
+					}
+
+					// Hold CTRL key for size snap
+					if (e.data.originalEvent.ctrlKey) {
+						width = Math.max(25, Math.round(width / 50)*50);
+						height = Math.max(25, Math.round(height / 50)*50);
+					}
+
+					resizer.x = width;
+					resizer.y = height;
+
+					resizer.sprite.width = width;
+					resizer.sprite.height = height;
 					
-					resizer.sprite.width = resizer.position.x + 0;
-					resizer.sprite.height = resizer.position.y + 0;
 					
-					//console.log(resizer.position.x , resizer.sprite.x, x); 
-					//resizer.sprite.height = resizer.position.y - resizer.sprite.y;
 
 					resizer.sprite.addAdorner();
-					//setTimeout(resizer.sprite.addAdorner(), 1);
 
       }
 
