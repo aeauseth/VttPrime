@@ -15,10 +15,10 @@ var createAdorner = function (sprite) {
 		var stage = sprite.GetStage();
 
 		// Add to selected items
-		if (!stage.selectedItems)
-		{
-			stage.selectedItems = [];
-		}
+		// if (!stage.selectedItems)
+		// {
+		// 	stage.selectedItems = [];
+		// }
 		
 
 		var overlayContainer = stage.overlayContainer;
@@ -56,7 +56,9 @@ var createAdorner = function (sprite) {
 		{
 			boundingBox = sprite.adorner = overlayContainer.addChild(new PIXI.Container());
 			boundingBox.name = "boundingBox";
-			stage.selectedItems.push(sprite);
+			//stage.selectedItems.push(sprite);
+			sprite.adorner.x = sprite.x;
+			sprite.adorner.y = sprite.y;
 		}
 		
     //boundingBox.x = sprite.x;
@@ -167,13 +169,22 @@ function onDocumentMouseWheel()
 	);
 }
 
+
 function onResizeStart(e)
 {
 	let resizer = e.currentTarget;
 	let stage = resizer.GetStage();
 	
 	
-
+	// window.stage.selectedItems.forEach(e2 =>
+	// 	{
+	// 		console.log(e2.currentTarget);
+	// 		if (e2.id != resizer.sprite.id)
+	// 		{
+	// 			e2.currentTarget.removeAdorner();
+	// 		}
+	// 	}
+	//);
 
 	//console.log("onResizeStart", resizer.name);
       
@@ -191,7 +202,7 @@ function onResizeStart(e)
 
 
 	//console.log(resizer.position.x , resizer.sprite.x);
-
+	e.stopPropagation();
 }
 
 function onResizeEnd(e)
@@ -284,11 +295,14 @@ PIXI.Container.prototype.removeAdorner = function ()
 	deleteAdorner(this);
 }
 
+window.PIXI = PIXI;
+
 var deleteAdorner = function (sprite) {
     console.log("deleteAdorner " + sprite.name, sprite);
     if (!sprite.adorner) return;
     sprite.adorner.parent.removeChild(sprite.adorner);
-    sprite.adorner = undefined;
+		sprite.adorner = undefined;
+		sprite.off("mousemove", onDragMove);
 }
 
 // Stage Zoom Handler

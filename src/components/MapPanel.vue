@@ -266,8 +266,8 @@ export default {
 
       var stage = window.stage = this.app.stage;
       stage.name = "stage";
-      //stage.interactive = true;
-      //stage.on("mousedown", this.stageMouseDownEventHandler);
+      stage.interactive = true;
+      stage.on("mousedown", this.stageMouseDownEventHandler);
 
       // KLUGE: grid & background are 65536 (or 1000 * 50) square centered at 0.
       //  A better solution would be to resize grid to viewport as needed.
@@ -472,8 +472,8 @@ export default {
       this.layersZindex[0].interactiveChildren = true;  // top layer (likely token) is active layer
 
       // Handlers
-      // stage.interactive = true;
-      // stage.on("mousemove", this.stageMouseMoveEventHandler);
+      stage.interactive = true;
+      stage.on("mousemove", this.stageMouseMoveEventHandler);
       // stage.on("mousedown", this.stageMouseDownEventHandler);
       // stage.on("mouseup", this.stageMouseUpEventHandler);
 
@@ -504,10 +504,16 @@ export default {
       // store a reference to the mouse data
       sprite.data = e.data;
 
+      if (window.stage.selectedItems.length > 0)
+      {
+        window.stage.selectedItems[0].removeAdorner();
+      }
+
       // update UI
       sprite.cursor = "grabbing";
       sprite.addAdorner();
       sprite.dragging = true;
+      window.stage.selectedItems = [ sprite ];
 
       // store where we clicked within the sprite (dragOffset)
       sprite.data.dragOffset = e.data.getLocalPosition(sprite.parent);
@@ -515,7 +521,7 @@ export default {
       sprite.data.dragOffset.y = sprite.data.dragOffset.y - sprite.y;
 
       //console.log("onDragStart", sprite, e.data, sprite.dragOffset);
-
+      e.stopPropagation();
     },
 
     onDragEnd(e) {
@@ -527,6 +533,7 @@ export default {
 
       // set the interaction data to null
       sprite.data = null;
+      e.stopPropagation();
     },
 
     onDragMove(e) {
@@ -536,6 +543,7 @@ export default {
           var newPosition = sprite.data.getLocalPosition(sprite.parent);
           sprite.position.x = newPosition.x - sprite.data.dragOffset.x;
           sprite.position.y = newPosition.y - sprite.data.dragOffset.y;
+          e.stopPropagation();
       }
     },
 
@@ -642,12 +650,6 @@ export default {
       // We are only concered with left clicks
       if (e.data.originalEvent.buttons == 1) {
 
-        if (e.target.name == 'resizeHandle')
-        {
-          this.selectedHandle = e.target;
-          e.stopPropagation();
-          return;
-        }
 
         this.selectedHandle = null;
 
@@ -780,12 +782,18 @@ export default {
       // If stage was clicked then no sprites were clicked, so unselect
       // We are only concered with left clicks
       if (e.data.originalEvent.buttons == 1) {
-        if (this.selectedSprite) {
-            if (e.target.name == 'resizeHandle') return;  // ignore resize handle
-            this.DeselectSprite(this.selectedSprite);
+        //if (this.selectedSprite) {
+        //    if (e.target.name == 'resizeHandle') return;  // ignore resize handle
+        //    this.DeselectSprite(this.selectedSprite);
           //}
+        //console.log("mousedown");
+      if (window.stage.selectedItems.length > 0)
+      {
+        window.stage.selectedItems[0].removeAdorner();
+        window.stage.selectedItems = [];
+      }
          
-        }
+        //}
       }
     },
 
@@ -831,49 +839,49 @@ export default {
         this.prevMousePosition.y = pos.y;
       }
 
-      if (e.data.originalEvent.buttons == 1) {
-        //console.log(e.data.originalEvent.buttons, selectedEntity);
+      // if (e.data.originalEvent.buttons == 1) {
+      //   //console.log(e.data.originalEvent.buttons, selectedEntity);
 
-        console.log(this.selectedHandle.name);
-        // Check for resize handle
-        if (this.selectedHandle)
-        {
-          console.log(this.selectedHandle.name);
-          e.stopPropagation();
-          return;
-        }
+      //   console.log(this.selectedHandle.name);
+      //   // Check for resize handle
+      //   if (this.selectedHandle)
+      //   {
+      //     console.log(this.selectedHandle.name);
+      //     e.stopPropagation();
+      //     return;
+      //   }
 
-        // Check for selected sprite
-        if (this.selectedSprite) {
-          if (this.selectedSprite.selected) {
-            let pos = e.data.global;
-            let stage = this.app.stage;
-            if (this.prevMousePosition.x) {
-              let dx = pos.x - this.prevMousePosition.x;
-              let dy = pos.y - this.prevMousePosition.y;
-              this.selectedSprite.x += dx / stage.scale.x;
-              this.selectedSprite.y += dy / stage.scale.x;
-            }
-            this.prevMousePosition.x = pos.x;
-            this.prevMousePosition.y = pos.y;
+      //   // Check for selected sprite
+      //   if (this.selectedSprite) {
+      //     if (this.selectedSprite.selected) {
+      //       let pos = e.data.global;
+      //       let stage = this.app.stage;
+      //       if (this.prevMousePosition.x) {
+      //         let dx = pos.x - this.prevMousePosition.x;
+      //         let dy = pos.y - this.prevMousePosition.y;
+      //         this.selectedSprite.x += dx / stage.scale.x;
+      //         this.selectedSprite.y += dy / stage.scale.x;
+      //       }
+      //       this.prevMousePosition.x = pos.x;
+      //       this.prevMousePosition.y = pos.y;
 
-            this.selectedSprite.cursor = "grabbing";
-            this.selectedSprite.__OnMove();
+      //       this.selectedSprite.cursor = "grabbing";
+      //       this.selectedSprite.__OnMove();
             
             
-            // Position Nameplate
-            if (this.app.stage.overlayContainer.namePlate)
-            {
-              if (this.app.stage.overlayContainer.namePlate.sprite)
-              {
-                let textElement = this.app.stage.overlayContainer.namePlate.children[1];
-                this.app.stage.overlayContainer.namePlate.x = this.app.stage.overlayContainer.namePlate.sprite.x +this.app.stage.overlayContainer.namePlate.sprite.width / 2 - textElement.width /2;
-                this.app.stage.overlayContainer.namePlate.y = this.app.stage.overlayContainer.namePlate.sprite.y + this.app.stage.overlayContainer.namePlate.sprite.height + 2;
-              }
-            }
-          }
-        }
-      }
+      //       // Position Nameplate
+      //       if (this.app.stage.overlayContainer.namePlate)
+      //       {
+      //         if (this.app.stage.overlayContainer.namePlate.sprite)
+      //         {
+      //           let textElement = this.app.stage.overlayContainer.namePlate.children[1];
+      //           this.app.stage.overlayContainer.namePlate.x = this.app.stage.overlayContainer.namePlate.sprite.x +this.app.stage.overlayContainer.namePlate.sprite.width / 2 - textElement.width /2;
+      //           this.app.stage.overlayContainer.namePlate.y = this.app.stage.overlayContainer.namePlate.sprite.y + this.app.stage.overlayContainer.namePlate.sprite.height + 2;
+      //         }
+      //       }
+      //     }
+      //   }
+      // }
 
       if (e.data.originalEvent.buttons == 0) {
         this.prevMousePosition = {};
@@ -1081,6 +1089,10 @@ export default {
       height: '50px',
       view: document.getElementById("mapCanvas"),
     });
+    window.renderer = this.app.renderer;
+    window.stage = this.app.stage;
+    window.stage.selectedItems = [];
+
     //this.$el.appendChild(this.app.view);
     this.app.backgroundColor = 0;
     this.app.resizeTo = this.$el;
