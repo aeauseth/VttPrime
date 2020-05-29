@@ -84,6 +84,7 @@
             <MapPanel ref="MapPanel" 
             :DiagProps="this.diagItems"
             :ToolBarStatus="this.toolBarStatus" 
+
             />
             </pane>
             <pane size="20">
@@ -243,6 +244,7 @@ export default {
 
   methods: {
 
+
     toolButtonClick (event)
     {
       console.log(this.toolBarStatus);
@@ -365,35 +367,16 @@ export default {
   mounted() {
     //console.log("mounted");
     window.addEventListener('resize', this.onResize);
-    //this.triggerResize();
-
-    // Associate menu with element
-    // this.menu.forEach(item => 
-    // {
-    //   let el = document.getElementById("menu_" + (item.title || item.key));
-    //   if (el)
-    //   {
-    //     item.el = el;
-
-    //     if (item.menu)
-    //     {
-    //       item.menu.forEach(item2 =>
-    //       {
-    //         let el2 = document.getElementById("menu_" + (item2.title || item2.key));
-    //         if (el2)
-    //         {
-    //           console.log(el2);
-    //           item2.el = el2;
-    //         }
-    //       });
-    //     }
-    //   }
-    // });
-      
-    // Basic Keyboard handling for menu hotkeys
-		//window.addEventListener("keydown", this.onKeyDown );
-
-
+    
+    //Prevent DRAGOVER and DROP to browser
+    window.addEventListener("dragover",function(e){
+      e = e || event;
+      e.preventDefault();
+    },false);
+    window.addEventListener("drop",function(e){
+      e = e || event;
+      e.preventDefault();
+    },false);
     
   },
   unload() {
@@ -403,6 +386,11 @@ export default {
 </script>
 
 <style scoped>
+
+/* #app {
+  cursor: no-drop;
+} */
+
 .aaHeight {
   height: calc(100vh - 120px);
   overflow-x: hidden;

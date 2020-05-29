@@ -23,11 +23,7 @@ var createAdorner = function (sprite) {
 
 		var overlayContainer = stage.overlayContainer;
 
-    // Make sure sprite has unique id
-    if (!sprite.id)
-    {
-        sprite.id = uuidv4();
-    }
+
 
     if (!overlayContainer && sprite.adorner)
     {
@@ -314,7 +310,7 @@ PIXI.Container.prototype.removeAdorner = function ()
 window.PIXI = PIXI;
 
 var deleteAdorner = function (sprite) {
-    console.log("deleteAdorner " + sprite.name, sprite);
+    //console.log("deleteAdorner " + sprite.name, sprite);
     if (!sprite.adorner) return;
     sprite.adorner.parent.removeChild(sprite.adorner);
 		sprite.adorner = undefined;

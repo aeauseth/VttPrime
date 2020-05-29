@@ -163,6 +163,12 @@ PIXI.Graphics.prototype.drawDashedPolygon = function (polygons, x, y, rotation, 
 	}
 }
 
+// PIXI.Container.prototype.Select = function()
+// {
+//   this.DeselectAllSprites();
+//   this.addAdorner();
+// }
+
 export default {
   name: 'MapPanel',
   props: {
@@ -182,7 +188,7 @@ export default {
             test: null
           }
         },
-        mousePosition: {x: 0, y: 0},
+        mousePosition: {x: 0, y: 0, data: null},
         prevMousePosition: {x: 0, y: 0},
         shaders: {
           gridShader: null,
@@ -420,19 +426,19 @@ export default {
       this.layers.object = layersContainer.addChild(new PIXI.Container());
       this.layers.object.name = "object";
 
-      var testObject = new PIXI.Graphics();
-      testObject.beginFill(0xff0000);
-      testObject.drawRect(0, 0, 1, 1);
-      testObject.endFill();
-      this.layers.object.addChild(testObject);
+      // var testObject = new PIXI.Graphics();
+      // testObject.beginFill(0xff0000);
+      // testObject.drawRect(0, 0, 1, 1);
+      // testObject.endFill();
+      // this.layers.object.addChild(testObject);
 
-      var testObject2 = new PIXI.Graphics();
-      testObject2.beginFill(0xff0000);
-      testObject2.drawRect(0, 0, 1, 1);
-      testObject2.endFill();
-      testObject2.x = 49;
-      testObject2.y = 49;
-      this.layers.object.addChild(testObject2);
+      // var testObject2 = new PIXI.Graphics();
+      // testObject2.beginFill(0xff0000);
+      // testObject2.drawRect(0, 0, 1, 1);
+      // testObject2.endFill();
+      // testObject2.x = 49;
+      // testObject2.y = 49;
+      // this.layers.object.addChild(testObject2);
       
 
       // TOKEN layer
@@ -494,12 +500,92 @@ export default {
       sprite.on("mouseupoutside", this.onSpriteEnd);
       sprite.on("mousemove", this.onSpriteMove);
       sprite.on("mouseover", this.onSpriteOver);
+      sprite.on("mouseout", this.onSpriteOut);
       sprite.cursor = "pointer";
+
+      // Default name
+      if (!sprite.name)
+      {
+        sprite.name = sprite.texture.baseTexture.textureCacheIds[0].split('.')[0].substring(0, 25);
+      }
+
+      // Make sure sprite has unique id
+      if (!sprite.id)
+      {
+          sprite.id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+          });
+      }
 
     },
 
     onSpriteOver(e) {
 
+      var sprite = e.currentTarget;
+
+      if (!this.app.stage.overlayContainer.namePlate) 
+      {
+        this.app.stage.overlayContainer.namePlate = this.app.stage.overlayContainer.addChild(new PIXI.Container());
+        this.app.stage.overlayContainer.namePlate.addChild( new PIXI.Graphics());
+        this.app.stage.overlayContainer.namePlate.addChild( new PIXI.Text());
+
+      }
+
+      let boxElement = this.app.stage.overlayContainer.namePlate.children[0];
+      let textElement = this.app.stage.overlayContainer.namePlate.children[1];
+
+      if (sprite) // && e.data.originalEvent.buttons != 1) 
+      {
+        textElement.text = sprite.name || "undefined";
+        this.app.stage.overlayContainer.namePlate.visible = true;
+        this.app.stage.overlayContainer.namePlate.sprite = sprite;
+      } 
+
+      // Text Element
+      var scale = 1 /  Math.sqrt(this.app.stage.scale.x);
+      if (scale > 1) {
+        scale = 1 / this.app.stage.scale.x;
+      }
+      if (textElement)
+      {
+        textElement.style.fontSize = (2 * scale).toFixed(2) + "em";
+        textElement.resolution = Math.max(1, this.app.stage.scale.x).toFixed(2);
+      }
+
+
+      // Box Element
+      if (textElement && boxElement)
+      {
+        if (textElement.height && textElement.width)
+        {
+          boxElement.clear();
+          boxElement.lineStyle(2 / this.app.stage.scale.x, 0xaaaaff);
+          boxElement.beginFill(0x9999ff);
+          let pad = Math.floor(textElement.height / 4);
+          boxElement.drawRoundedRect(
+            textElement.x - pad, 
+            textElement.y, 
+            textElement.width + pad * 2, 
+            textElement.height, 
+            6);
+          boxElement.endFill();
+        }
+        
+      }
+
+      // Position Container
+      if (this.app.stage.overlayContainer.namePlate.sprite && textElement)
+      {
+        this.app.stage.overlayContainer.namePlate.x = this.app.stage.overlayContainer.namePlate.sprite.x +this.app.stage.overlayContainer.namePlate.sprite.width / 2 - textElement.width /2;
+        this.app.stage.overlayContainer.namePlate.y = this.app.stage.overlayContainer.namePlate.sprite.y + this.app.stage.overlayContainer.namePlate.sprite.height + 2;
+      }
+
+    },
+
+    onSpriteOut(e) {
+      var sprite = e.currentTarget;
+      this.app.stage.overlayContainer.namePlate.visible = false;
     },
 
     onSpriteStart(e) {
@@ -511,7 +597,10 @@ export default {
 
       if (window.stage.selectedItems.length > 0)
       {
-        window.stage.selectedItems[0].removeAdorner();
+        if (window.stage.selectedItems[0].id != sprite.id)
+        {
+          window.stage.selectedItems[0].removeAdorner();
+        }
       }
 
       // update UI
@@ -557,7 +646,16 @@ export default {
           
           sprite.position.x = x;
           sprite.position.y = y;
-          e.stopPropagation();
+
+        // Nameplate
+        if (this.app.stage.overlayContainer.namePlate)
+        {
+          let textElement = this.app.stage.overlayContainer.namePlate.children[1];
+          this.app.stage.overlayContainer.namePlate.x = this.app.stage.overlayContainer.namePlate.sprite.x +this.app.stage.overlayContainer.namePlate.sprite.width / 2 - textElement.width /2;
+          this.app.stage.overlayContainer.namePlate.y = this.app.stage.overlayContainer.namePlate.sprite.y + this.app.stage.overlayContainer.namePlate.sprite.height + 2;
+        }
+
+        e.stopPropagation();
       }
     },
 
@@ -840,6 +938,7 @@ export default {
     stageMouseMoveEventHandler(e)
     {
       this.mousePosition = e.data.getLocalPosition(this.app.stage);
+      this.mousePosition.data = e.data;
       //console.log(this.mousePosition);
       if (e.data.originalEvent.buttons == 2) {
 
@@ -1010,7 +1109,8 @@ export default {
       if (this.app)
       {
 
-        this.selectedSprite = null;
+        //this.selectedSprite = null;
+        this.DeselectAllSprites();
 
         // Remove all layers
         this.layers = {};
@@ -1030,8 +1130,9 @@ export default {
       }
 
       // Destroy textures (required to clear GPU memory)
-      Object.keys(PIXI.utils.TextureCache).forEach(function(texture) { PIXI.utils.TextureCache[texture].destroy(true);});
-    
+      Object.keys(PIXI.utils.TextureCache).forEach(function(texture) { if(PIXI.utils.TextureCache[texture]) PIXI.utils.TextureCache[texture].destroy(true);});
+      PIXI.Loader.shared.reset();
+
     },
 
     // NewCampaign() {
@@ -1091,7 +1192,88 @@ export default {
       this.stageResize();
     },
 
+    dropFile(e) {
+
+      if (e.dataTransfer.items)
+      {
+        
+        for (var i = 0; i < e.dataTransfer.items.length; i++) {
+          // If dropped items aren't files, reject them
+          if (e.dataTransfer.items[i].kind === 'file') {
+            var file = e.dataTransfer.items[i].getAsFile();
+            //console.log('... file[' + i + '].name = ' + file.name, file, e.dataTransfer.items[i]);
+
+            
+            if (file.type.indexOf("image") > -1)
+            {
+              
+              this.DeselectAllSprites();
+
+              var upload = null;
+              var that = this;
+
+              if (PIXI.Loader.shared.resources[file.name])
+              {
+                const sprite = new PIXI.Sprite(PIXI.Loader.shared.resources[file.name].texture);
+                //console.log(sprite);
+                that.dropFileComplete(sprite, file);
+              } 
+              else
+              {
+                var fReader = new FileReader();
+                fReader.onload = function(){
+                    upload = fReader.result;
+                    //console.log(upload);
+                    //var tex = PIXI.Texture.from(upload);
+                    //var sprite;
+                    
+                    // Load texture into PIXI (async)
+                    PIXI.Loader.shared
+                        .add(file.name, upload)
+                        .load((loader, resources) => {
+                            const sprite = new PIXI.Sprite(resources[file.name].texture);
+                            that.dropFileComplete(sprite, file);
+                    });
+                    
+                };
+                fReader.readAsDataURL(file); //async
+              }
+              
+             }
+
+
+          }
+        }
+      }
+    },
+
+    dropFileComplete(sprite, file)
+    {
+      
+      sprite.name = file.name.split(".")[0];
+      this.AddSpriteHandlers(sprite);
+      this.activeLayer().addChild(sprite);
+      sprite.x = this.mousePosition.x - sprite.width / 2;
+      sprite.y = this.mousePosition.y - sprite.height / 2;
+
+      // Select new Sprite
+      sprite.cursor = "grabbing";
+      sprite.addAdorner();
+      window.stage.selectedItems = [ sprite ];
+      sprite.data = this.mousePosition.data;
+      this.onSpriteOver( { currentTarget: sprite});
+
+      console.log(sprite, sprite.id, sprite.name);
+      if (sprite.width < 50)
+      {
+        console.log("bad sprite");
+      }
+    },
     
+    activeLayer() {
+      //console.log(this.layersZindex, this.layersSelectedIndex);
+      return this.layersZindex[this.layersSelectedIndex];
+    }
   },
   
   
@@ -1118,7 +1300,7 @@ export default {
     //this.$el.style.marginLeft = "5px";
     //this.$el.style.marginTop = "5px";
 
-    
+
     
     // KLUGE: The splitter panes start with equidistant sizes, then resizes to SIZE.
     // The splitter @ready fires before the pane SIZE is set (a likely bug).
@@ -1141,6 +1323,10 @@ export default {
       if (e.stopPropagation != undefined)
         e.stopPropagation();
     };
+
+    //this.app.view.addEventListener("dragover", function (e) { console.log("dragover")} );
+    this.app.view.addEventListener("drop", this.dropFile, false );
+
 
     document.addEventListener("mousewheel", this.mouseWheelHandler, false);
     //this.app.$el.addEventListener("mousedown", this.stageMouseDownEventHandler, false);
@@ -1228,6 +1414,8 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+
+
 /* h3 {
   margin: 40px 0 0;
 }
@@ -1245,6 +1433,11 @@ a {
 #mapDiv {
   position:relative
 }
+
+/* canvas {
+  outline: aliceblue 3px dashed;
+  outline-offset: -10px;
+} */
 
 #listLayers {
   position: absolute;
