@@ -14,11 +14,7 @@ var createAdorner = function (sprite) {
 		
 		var stage = sprite.GetStage();
 
-		// Add to selected items
-		// if (!stage.selectedItems)
-		// {
-		// 	stage.selectedItems = [];
-		// }
+		
 		
 
 		var overlayContainer = stage.overlayContainer;
@@ -48,13 +44,13 @@ var createAdorner = function (sprite) {
 		//sprite.adorner.removeChildren();
 
 		var boundingBox = sprite.adorner;
+
 		if (!boundingBox) 
 		{
 			boundingBox = sprite.adorner = overlayContainer.addChild(new PIXI.Container());
 			boundingBox.name = "boundingBox";
-			//stage.selectedItems.push(sprite);
-			sprite.adorner.x = sprite.x;
-			sprite.adorner.y = sprite.y;
+			//sprite.adorner.x = sprite.x;
+			//sprite.adorner.y = sprite.y;
 		}
 		
     //boundingBox.x = sprite.x;
@@ -92,9 +88,6 @@ var createAdorner = function (sprite) {
 		// Mouse Move Handler
 		sprite.on("mousemove", onDragMove);
 
-
-
-
 		// Resize Handle
 		var resizer = boundingBox.children[2];
 		if (!resizer) 
@@ -120,47 +113,66 @@ var createAdorner = function (sprite) {
 		resizer.x = sprite.width;
 		resizer.y = sprite.height;
 
-		
-
-    // circles
-    
-    // let points = [ [0, 0], 
-    //     [sprite.width, 0], 
-    //     [sprite.width, sprite.height],
-    //     [0 , sprite.height] 
-    // ];
-    // for (let p = 0; p < points.length; p++)
-    // {
-		// 	let circle = boundingBox.addChild(new PIXI.Graphics());
-    //     circle.lineStyle(1 / stage.scale.x, 0x000000, 1);
-    //     circle.beginFill(0x9999ff);
-    //     circle.drawCircle(points[p][0], points[p][1], 5 / stage.scale.x);
-    //     circle.endFill();
-    //     circle.interactive = true;
-    //     if (p % 2 == 0) {
-    //         circle.cursor = "nwse-resize";
-    //     } else
-    //     {
-    //         circle.cursor = "nesw-resize";
-    //     }
-        
-        
-    // }
-
+		// Pivot
+		//sprite.adorner.pivot.set(0.5, 0.5);
+		boundingBox.pivot.set(sprite.width /2, sprite.height /2);
+		sprite.SetOrigin();
 
 
 }
 
-// sprite.interactive = true;
 
-// 			sprite.cursor = "pointer";
 
-function onDocumentMouseWheel()
+function onDocumentMouseWheel(e)
 {
-	//sprite.addAdorner();
-	window.stage.selectedItems.forEach(e =>
+	if (e.shiftKey)
+	{
+		if (window.stage.selectedItems.length == 1)
 		{
-		e.addAdorner();
+			let sprite = window.stage.selectedItems[0];
+
+			var delta = 45;
+
+			if (e.ctrlKey)
+			{
+				delta = 5;
+			}
+
+			if (e.deltaY < 0)
+			{
+				sprite.angle += delta;
+			} 
+			else
+			{
+				sprite.angle -= delta;
+			}
+
+			// Angle Snap (default)
+			if (!e.ctrlKey)
+			{
+				sprite.angle = Math.round(sprite.angle / 45) * 45;
+			}
+
+			sprite.adorner.angle = sprite.angle;
+			//console.log(sprite.angle.toFixed(0), sprite.x, sprite.y, sprite.pivot.x, sprite.pivot.y);
+
+			// Position nameplate
+			if (window.stage.overlayContainer.namePlate)
+			{
+				setTimeout(function() {
+				let textElement = window.stage.overlayContainer.namePlate.children[1];
+				window.stage.overlayContainer.namePlate.x = window.stage.overlayContainer.namePlate.sprite._x + window.stage.overlayContainer.namePlate.sprite.width / 2 - textElement.width /2;
+				window.stage.overlayContainer.namePlate.y = sprite.getBounds().bottom + 3;
+				}, 1);
+			}
+			
+		}
+		return;
+	}
+
+	window.stage.selectedItems.forEach(sprite =>
+		{
+			sprite.addAdorner();
 		}
 	);
 }
@@ -171,20 +183,6 @@ function onResizeStart(e)
 	let resizer = e.currentTarget;
 	let stage = resizer.GetStage();
 	
-	
-	// window.stage.selectedItems.forEach(e2 =>
-	// 	{
-	// 		console.log(e2.currentTarget);
-	// 		if (e2.id != resizer.sprite.id)
-	// 		{
-	// 			e2.currentTarget.removeAdorner();
-	// 		}
-	// 	}
-	//);
-
-	//console.log("onResizeStart", resizer.name);
-      
-
 	// store a reference to the mouse data
 	resizer.data = e.data;
 
@@ -195,8 +193,6 @@ function onResizeStart(e)
 	resizer.data.dragOffset.x = resizer.data.dragOffset.x - resizer.x;
 	resizer.data.dragOffset.y = resizer.data.dragOffset.y - resizer.y;
 
-
-
 	//console.log(resizer.position.x , resizer.sprite.x);
 	e.stopPropagation();
 }
@@ -205,10 +201,6 @@ function onResizeEnd(e)
 {
 	let resizer = e.currentTarget;
 	resizer.dragging = false;
-
-	//resizer.sprite.width = resizer.position.x + 0;
-	//resizer.sprite.height = resizer.position.y + 0;
-	//resizer.sprite.addAdorner();
 
 	// set the interaction data to null
 	resizer.data = null;
@@ -238,8 +230,8 @@ function onResizeMove(e)
 
 					// Hold CTRL key for size snap
 					if (e.data.originalEvent.ctrlKey) {
-						width = Math.max(25, Math.round(width / 50)*50);
-						height = Math.max(25, Math.round(height / 50)*50);
+						width = Math.max(25, Math.round(width / 25)*25);
+						height = Math.max(25, Math.round(height / 25)*25);
 					}
 
 					resizer.x = width;
@@ -247,8 +239,6 @@ function onResizeMove(e)
 
 					resizer.sprite.width = width;
 					resizer.sprite.height = height;
-					
-					
 
 					resizer.sprite.addAdorner();
 
@@ -306,6 +296,29 @@ PIXI.Container.prototype.removeAdorner = function ()
 	//console.log(this);
 	deleteAdorner(this);
 }
+PIXI.Sprite.prototype.SetOrigin = function ()
+{
+	
+
+	// Pivot alters the origin; workaround
+	if (this._x == undefined) {
+		this._x = this.x;
+		this._y = this.y;
+		this.x += this.width /2;
+		this.y += this.height /2;
+	} 
+	else
+	{
+		this._x = this.x - this.width /2;
+		this._y = this.y - this.height /2;
+	}
+	
+	if (this.adorner)
+	{
+		this.adorner.x = this.x;
+		this.adorner.y = this.y;
+	}
+}
 
 window.PIXI = PIXI;
 
@@ -317,8 +330,12 @@ var deleteAdorner = function (sprite) {
 		sprite.off("mousemove", onDragMove);
 }
 
-// Stage Zoom Handler
-document.addEventListener("mousewheel", onDocumentMouseWheel, false);
+// Stage MouseWheel Handler
+if (!window.hasMouseWheelSpriteAdorner)
+{
+	document.addEventListener("mousewheel", onDocumentMouseWheel, false);
+	window.hasMouseWheelSpriteAdorner = true;
+}
 
 // Object.defineProperty(exports, "__esModule", {
 //     value: true

@@ -518,6 +518,10 @@ export default {
           });
       }
 
+      // Anchor fix
+      sprite.anchor.set(0.5, 0.5);
+      sprite.SetOrigin();
+
     },
 
     onSpriteOver(e) {
@@ -574,12 +578,8 @@ export default {
         
       }
 
-      // Position Container
-      if (this.app.stage.overlayContainer.namePlate.sprite && textElement)
-      {
-        this.app.stage.overlayContainer.namePlate.x = this.app.stage.overlayContainer.namePlate.sprite.x +this.app.stage.overlayContainer.namePlate.sprite.width / 2 - textElement.width /2;
-        this.app.stage.overlayContainer.namePlate.y = this.app.stage.overlayContainer.namePlate.sprite.y + this.app.stage.overlayContainer.namePlate.sprite.height + 2;
-      }
+      this.PositionNamePlate(sprite);
+
 
     },
 
@@ -614,7 +614,6 @@ export default {
       sprite.data.dragOffset.x = sprite.data.dragOffset.x - sprite.x;
       sprite.data.dragOffset.y = sprite.data.dragOffset.y - sprite.y;
 
-      //console.log("onDragStart", sprite, e.data, sprite.dragOffset);
       e.stopPropagation();
     },
 
@@ -640,191 +639,38 @@ export default {
           let y = newPosition.y - sprite.data.dragOffset.y;
 					// Hold CTRL key to snap to grid
 					if (e.data.originalEvent.ctrlKey) {
-						x = Math.round(x / 50)*50;
-						y = Math.round(y / 50)*50;
+
+            let _x = x - sprite.width /2;
+            let _y = y - sprite.height /2;
+    
+						_x = Math.round( _x / 50 ) * 50;
+            _y = Math.round( _y / 50 ) * 50;
+            
+            x = _x + sprite.width / 2;
+            y = _y + sprite.width / 2;
           }
           
-          sprite.position.x = x;
-          sprite.position.y = y;
+          sprite.x = x;
+          sprite.y = y;
+          sprite.SetOrigin();
 
-        // Nameplate
-        if (this.app.stage.overlayContainer.namePlate)
-        {
-          let textElement = this.app.stage.overlayContainer.namePlate.children[1];
-          this.app.stage.overlayContainer.namePlate.x = this.app.stage.overlayContainer.namePlate.sprite.x +this.app.stage.overlayContainer.namePlate.sprite.width / 2 - textElement.width /2;
-          this.app.stage.overlayContainer.namePlate.y = this.app.stage.overlayContainer.namePlate.sprite.y + this.app.stage.overlayContainer.namePlate.sprite.height + 2;
-        }
+          this.PositionNamePlate(sprite);
 
         e.stopPropagation();
       }
     },
 
-
-    _SpriteMouseOver(e) {
-
-      if (!this.app.stage.overlayContainer) return;
-      if (!e) return;
-      
-      // Skip if any mouse button is down
-      if (e.data.originalEvent.buttons > 0) return;
-
-      // if (!e && this.namePlate) {
-      //   let textElement = this.namePlate.children[1];
-      //   textElement.style.fontSize = (2 * 1 / this.app.stage.scale.x).toFixed(2) + "em";
-      //   return;
-      // }
-
-      // Ignore if not part of selected layer
-      if(e.target.parent.name != this.layersZindex[this.layersSelectedIndex].name) return;
-
-
-      let sprite = (e || {}).currentTarget;
-
-      
-      window.PIXI = PIXI;
-
-      if (!this.app.stage.overlayContainer.namePlate) 
-      {
-        this.app.stage.overlayContainer.namePlate = this.app.stage.overlayContainer.addChild(new PIXI.Container());
-        this.app.stage.overlayContainer.namePlate.addChild( new PIXI.Graphics());
-        this.app.stage.overlayContainer.namePlate.addChild( new PIXI.Text());
-
-      }
-
-      let boxElement = this.app.stage.overlayContainer.namePlate.children[0];
-      let textElement = this.app.stage.overlayContainer.namePlate.children[1];
-
-      // 
-      if (sprite) // && e.data.originalEvent.buttons != 1) 
-      {
-        textElement.text = sprite.name || "undefined";
-        this.app.stage.overlayContainer.namePlate.visible = true;
-        this.app.stage.overlayContainer.namePlate.sprite = sprite;
-      } 
-
-      // Text Element
-      var scale = 1 /  Math.sqrt(this.app.stage.scale.x);
-      if (scale > 1) {
-        scale = 1 / this.app.stage.scale.x;
-      }
-      if (textElement)
-      {
-        textElement.style.fontSize = (2 * scale).toFixed(2) + "em";
-        textElement.resolution = Math.max(1, this.app.stage.scale.x).toFixed(2);
-        //console.log(textElement.style.fontSize, textElement.resolution);
-      }
-
-
-      // Box Element
-      if (textElement && boxElement)
-      {
-        if (textElement.height && textElement.width)
+    PositionNamePlate(sprite)
+    {
+        if (this.app.stage.overlayContainer.namePlate && sprite)
         {
-          boxElement.clear();
-          boxElement.lineStyle(2 / this.app.stage.scale.x, 0xaaaaff);
-          boxElement.beginFill(0x9999ff);
-          let pad = Math.floor(textElement.height / 4);
-          boxElement.drawRoundedRect(
-            textElement.x - pad, 
-            textElement.y, 
-            textElement.width + pad * 2, 
-            textElement.height, 
-            6);
-          boxElement.endFill();
+          let textElement = this.app.stage.overlayContainer.namePlate.children[1];
+          this.app.stage.overlayContainer.namePlate.x = this.app.stage.overlayContainer.namePlate.sprite._x + this.app.stage.overlayContainer.namePlate.sprite.width / 2 - textElement.width /2;
+          this.app.stage.overlayContainer.namePlate.y = sprite.getBounds().bottom + 3;
         }
-        
-      }
-
-      // Position Container
-      if (this.app.stage.overlayContainer.namePlate.sprite && textElement)
-      {
-        this.app.stage.overlayContainer.namePlate.x = this.app.stage.overlayContainer.namePlate.sprite.x +this.app.stage.overlayContainer.namePlate.sprite.width / 2 - textElement.width /2;
-        this.app.stage.overlayContainer.namePlate.y = this.app.stage.overlayContainer.namePlate.sprite.y + this.app.stage.overlayContainer.namePlate.sprite.height + 2;
-      }
-
     },
 
-    _SpriteMouseOut(e) {
 
-      // Skip if any mouse button is down
-      if (e.data.originalEvent.buttons > 0) return;
-
-      // hide namePlate
-      if (this.app.stage.overlayContainer.namePlate)
-      {
-      this.app.stage.overlayContainer.namePlate.visible = false;
-      }
-      //e.currentTarget.mouseover = false;
-      //this.SelectedSpriteResize();
-    },
-    
-    // _SpriteMouseDown(e) {
-    //   // We are only concered with left clicks
-    //   if (e.data.originalEvent.buttons == 1) {
-
-
-    //     this.selectedHandle = null;
-
-    //     // Ignore if not part of selected layer
-    //     if(e.target.parent.name != this.layersZindex[this.layersSelectedIndex].name) return;
-    //     this.SelectSprite(e.target);
-    //     e.target.cursor = "grabbing";
-    //     e.stopPropagation();
-    //   }
-    // },
-
-    // _SpriteMouseUp(e) {
-    //   this.SpriteMouseOver(e);
-    //   if (this.selectedSprite)
-    //   {
-    //     this.selectedSprite.cursor = "grab";
-    //   }
-    // },
-
-    // _SelectSprite(sprite) {
-    //   //console.log("SelectSprite", sprite.name, sprite);
-
-    //   if (this.selectedSprite)
-    //   {
-    //     // Do nothing if same sprite is selected again
-    //     if (this.selectedSprite.id == sprite.id) return true;
-
-    //     // Otherwise deselect current selected sprite
-    //     this.DeselectSprite(this.selectedSprite);
-    //   }
-
-    //   this.selectedSprite = sprite;
-    //   window.selectedSprite = sprite;
-    //   sprite.selected = true;
-    //   sprite.cursor = "grab";
-    //   SPRITEADORNER.createAdorner(sprite, this.app.stage.overlayContainer);
-
-    //   window.sprite = sprite;
-
-    //   //this.app.stage.overlayContainer.visible = true;
-    //   //this.SelectedSpriteResize();
-
-    //   this.updateDiag();
-
-    //   return true;
-    // },
-
-    // _DeselectSprite(sprite) {
-
-    //   //console.log("DeslectSprite", sprite.name, sprite);
-    //   if (!sprite) return;
-
-
-    //   SPRITEADORNER.deleteAdorner(sprite);
-    //   sprite.selected = false;
-    //   sprite.cursor = "pointer";
-    //   this.selectedSprite = null;
-    //   //this.app.stage.overlayContainer.boundingBox.visible = false;
-
-    //   window.selectedSprite = null;
-    //   this.updateDiag();
-      
-    // },
     DeselectAllSprites() {
       if (window.stage.selectedItems.length > 0)
       {
@@ -833,91 +679,15 @@ export default {
       }
     },
 
-    // _SelectedSpriteResize() {
-    //   var sprite = this.selectedSprite;
-    //   if (!sprite) {
-    //     return;
-    //   }
-
-    //   // Determine bounds of sprite
-    //   var bounds = {};
-    //   bounds.width = sprite.width;
-    //   bounds.height = sprite.height;
-    //   bounds.x = sprite.x - sprite.anchor.x * bounds.width;
-    //   bounds.y = sprite.y - sprite.anchor.y * bounds.height;
-
-    //   // TODO: We might be able to reuse this overlay if scale & rotation are the same
-      
-    //   // Remove any previous overlays
-    //   // this.app.stage.overlayContainer.children.forEach( child => {
-    //   //   child.destroy();
-    //   // });
-    //   // this.app.stage.overlayContainer.removeChildren();
-
-    //   // Draw boundingbox overlay
-    //   let stage = this.app.stage;
- 
-    //   var boundingBox = this.app.stage.overlayContainer.boundingBox;
-    //   if (!boundingBox) 
-    //   {
-    //     boundingBox = this.app.stage.overlayContainer.boundingBox = this.app.stage.overlayContainer.addChild(new PIXI.Container());
-    //   }
-    //   boundingBox.visible = true;
-
-    //   if (boundingBox.visible)
-    //   {
-
-    //     // Red Line
-    //     let solidRect = boundingBox.children[0];
-    //     if (!solidRect) solidRect = boundingBox.addChild(new PIXI.Graphics());
-    //     solidRect.clear();
-    //     solidRect.lineStyle(3 / stage.scale.x, 0x800000, 1);
-    //     solidRect.drawRect(0, 0, sprite.width, sprite.height);
-    //     solidRect.x = sprite.x;
-    //     solidRect.y = sprite.y;
-    //     solidRect.filters = [new DropShadowFilter()];
-
-    //     // drawDashedPolygon (white)
-    //     let dashRect = boundingBox.children[1];
-    //     if (!dashRect) dashRect = boundingBox.addChild(new PIXI.Graphics());
-    //     dashRect.clear();
-    //     dashRect.lineStyle(2 / stage.scale.x, 0xffffff, 1);
-    //     let polygons = [];
-    //     polygons.push({ x: 0, y: 0 });
-    //     polygons.push({ x: sprite.width, y: 0 });
-    //     polygons.push({ x: sprite.width, y: sprite.height });
-    //     polygons.push({ x: 0, y: sprite.height });
-    //     var step = 5 / stage.scale.x;
-    //     dashRect.drawDashedPolygon(polygons, 0, 0, 0, step, step * 1.5, 0);
-    //     dashRect.x = sprite.x;
-    //     dashRect.y = sprite.y;
-    //   }
-
-    //   this.updateDiag();
-    // },
 
     stageMouseDownEventHandler(e) {
-      //console.log("stageMouseDownEventHandler", e, this.selectedSprite);
-      // If stage was clicked then no sprites were clicked, so unselect
+      // If stage was clicked then no sprites were clicked, so Deselect all sprites.
       // We are only concered with left clicks
       if (e.data.originalEvent.buttons == 1) {
-        //if (this.selectedSprite) {
-        //    if (e.target.name == 'resizeHandle') return;  // ignore resize handle
-        //    this.DeselectSprite(this.selectedSprite);
-          //}
-        //console.log("mousedown");
-      this.DeselectAllSprites();
-         
-        //}
+        this.DeselectAllSprites();
       }
     },
 
-    _stageMouseUpEventHandler() {
-      if (this.selectedSprite) {
-        this.selectedSprite.cursor = "grab";
-      }
-      return true;
-    },
 
     CreateMap_Basic1()
     {
@@ -955,49 +725,7 @@ export default {
         this.prevMousePosition.y = pos.y;
       }
 
-      // if (e.data.originalEvent.buttons == 1) {
-      //   //console.log(e.data.originalEvent.buttons, selectedEntity);
-
-      //   console.log(this.selectedHandle.name);
-      //   // Check for resize handle
-      //   if (this.selectedHandle)
-      //   {
-      //     console.log(this.selectedHandle.name);
-      //     e.stopPropagation();
-      //     return;
-      //   }
-
-      //   // Check for selected sprite
-      //   if (this.selectedSprite) {
-      //     if (this.selectedSprite.selected) {
-      //       let pos = e.data.global;
-      //       let stage = this.app.stage;
-      //       if (this.prevMousePosition.x) {
-      //         let dx = pos.x - this.prevMousePosition.x;
-      //         let dy = pos.y - this.prevMousePosition.y;
-      //         this.selectedSprite.x += dx / stage.scale.x;
-      //         this.selectedSprite.y += dy / stage.scale.x;
-      //       }
-      //       this.prevMousePosition.x = pos.x;
-      //       this.prevMousePosition.y = pos.y;
-
-      //       this.selectedSprite.cursor = "grabbing";
-      //       this.selectedSprite.__OnMove();
-            
-            
-      //       // Position Nameplate
-      //       if (this.app.stage.overlayContainer.namePlate)
-      //       {
-      //         if (this.app.stage.overlayContainer.namePlate.sprite)
-      //         {
-      //           let textElement = this.app.stage.overlayContainer.namePlate.children[1];
-      //           this.app.stage.overlayContainer.namePlate.x = this.app.stage.overlayContainer.namePlate.sprite.x +this.app.stage.overlayContainer.namePlate.sprite.width / 2 - textElement.width /2;
-      //           this.app.stage.overlayContainer.namePlate.y = this.app.stage.overlayContainer.namePlate.sprite.y + this.app.stage.overlayContainer.namePlate.sprite.height + 2;
-      //         }
-      //       }
-      //     }
-      //   }
-      // }
+      
 
       if (e.data.originalEvent.buttons == 0) {
         this.prevMousePosition = {};
@@ -1010,15 +738,12 @@ export default {
       if (this.shaders.gridShader)
       {
         this.shaders.gridShader.uniforms.offset = { 
-          x: this.app.stage.x + 0,
-          y: this.app.renderer.view.height - this.app.stage.y };  // OpenGL's Y is reversed
-        // this.app.stage.x = 0;
-        // this.app.stage.y = 0;
+          x: this.app.stage.x,
+          y: this.app.renderer.view.height - this.app.stage.y};  // OpenGL's Y is reversed
         this.shaders.gridShader.uniforms.scale = { 
           x: this.app.stage.scale.x,
           y: this.app.stage.scale.y };
       }
-      //this.SpriteMouseOver();
 
     },
     
@@ -1130,8 +855,9 @@ export default {
       }
 
       // Destroy textures (required to clear GPU memory)
-      Object.keys(PIXI.utils.TextureCache).forEach(function(texture) { if(PIXI.utils.TextureCache[texture]) PIXI.utils.TextureCache[texture].destroy(true);});
       PIXI.Loader.shared.reset();
+      Object.keys(PIXI.utils.TextureCache).forEach(function(texture) { if(PIXI.utils.TextureCache[texture]) PIXI.utils.TextureCache[texture].destroy(true);});
+      
 
     },
 
@@ -1169,8 +895,11 @@ export default {
 
     mouseWheelHandler(e) {
       //console.log("mouseWheel", e);
+      e.preventDefault();
+      if (e.shiftKey) return;
       var bb = e.target.getBoundingClientRect();
       this.zoom(e.clientX - bb.left, e.clientY - bb.top, e.deltaY < 0);
+      e.preventDefault();
     },
 
     zoom(x, y, isZoomIn) {
@@ -1212,13 +941,6 @@ export default {
               var upload = null;
               var that = this;
 
-              if (PIXI.Loader.shared.resources[file.name])
-              {
-                const sprite = new PIXI.Sprite(PIXI.Loader.shared.resources[file.name].texture);
-                //console.log(sprite);
-                that.dropFileComplete(sprite, file);
-              } 
-              else
               {
                 var fReader = new FileReader();
                 fReader.onload = function(){
@@ -1228,12 +950,22 @@ export default {
                     //var sprite;
                     
                     // Load texture into PIXI (async)
-                    PIXI.Loader.shared
-                        .add(file.name, upload)
-                        .load((loader, resources) => {
-                            const sprite = new PIXI.Sprite(resources[file.name].texture);
-                            that.dropFileComplete(sprite, file);
-                    });
+
+                    if (PIXI.Loader.shared.resources[upload])
+                    {
+                      const tex = PIXI.Loader.shared.resources[upload].texture;
+                      const sprite = new PIXI.Sprite(tex);
+                      that.dropFileComplete(sprite, file);
+                    }else
+                    {
+                      PIXI.Loader.shared
+                          .add(upload)
+                          .load((loader, resources) => {
+                              const tex = PIXI.Loader.shared.resources[upload].texture;
+                              const sprite = new PIXI.Sprite(tex);
+                              that.dropFileComplete(sprite, file);
+                      });
+                    }
                     
                 };
                 fReader.readAsDataURL(file); //async
@@ -1257,13 +989,13 @@ export default {
       sprite.y = this.mousePosition.y - sprite.height / 2;
 
       // Select new Sprite
-      sprite.cursor = "grabbing";
+      sprite.cursor = "pointer";
       sprite.addAdorner();
       window.stage.selectedItems = [ sprite ];
       sprite.data = this.mousePosition.data;
       this.onSpriteOver( { currentTarget: sprite});
 
-      console.log(sprite, sprite.id, sprite.name);
+      console.log(sprite, sprite.id, sprite.name, sprite.width, sprite.height, sprite.parent.name);
       if (sprite.width < 50)
       {
         console.log("bad sprite");
@@ -1328,7 +1060,7 @@ export default {
     this.app.view.addEventListener("drop", this.dropFile, false );
 
 
-    document.addEventListener("mousewheel", this.mouseWheelHandler, false);
+    document.body.addEventListener("mousewheel", this.mouseWheelHandler, {passive: false});
     //this.app.$el.addEventListener("mousedown", this.stageMouseDownEventHandler, false);
 
 
