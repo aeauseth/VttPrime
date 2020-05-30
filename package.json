@@ -16,7 +16,9 @@
     "splitpanes": "^2.2.1",
     "v-hotkey": "^0.8.0",
     "vue": "^2.6.11",
+    "vue-multipane": "^0.9.5",
     "vue-pixi": "^0.1.1",
+    "vue-resize-split-pane": "^0.1.5",
     "vuedraggable": "^2.23.2",
     "vuetify": "^2.2.11"
   },

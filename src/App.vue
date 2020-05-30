@@ -109,6 +109,10 @@
 
       </splitpanes>
     </v-content>
+
+
+
+
     <v-system-bar>
       System Bar
     </v-system-bar>
@@ -167,7 +171,7 @@
                 <a href="https://konvajs.org/docs/select_and_transform/Basic_demo.html" target="_blank">Sprite sizing handle Transforms</a>
               </li>
               <li>
-                  <a href="https://developer.okta.com/blog/2018/07/03/deploy-vue-app-aws">AWS Lanbda</a>
+                  <a href="https://developer.okta.com/blog/2018/07/03/deploy-vue-app-aws">AWS Lambda</a>
               </li>
             </ol>
             </p>
@@ -192,7 +196,6 @@
 // SplitPanes
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
-
 import MapPanel from './components/MapPanel';
 
 
@@ -429,6 +432,8 @@ export default {
 /* #diagTree .v-treeview--dense {
   min-height:10px;
 } */
+
+
 
 
 </style>
