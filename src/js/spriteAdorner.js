@@ -157,14 +157,16 @@ function onDocumentMouseWheel(e)
 			//console.log(sprite.angle.toFixed(0), sprite.x, sprite.y, sprite.pivot.x, sprite.pivot.y);
 
 			// Position nameplate
-			if (window.stage.overlayContainer.namePlate)
-			{
-				setTimeout(function() {
-				let textElement = window.stage.overlayContainer.namePlate.children[1];
-				window.stage.overlayContainer.namePlate.x = window.stage.overlayContainer.namePlate.sprite._x + window.stage.overlayContainer.namePlate.sprite.width / 2 - textElement.width /2;
-				window.stage.overlayContainer.namePlate.y = sprite.getBounds().bottom + 3;
-				}, 1);
-			}
+			window.stage.overlayContainer.namePlate.update();
+			// if (window.stage.overlayContainer.namePlate)
+			// {
+			// 	setTimeout(function() {
+			// 	let textElement = window.stage.overlayContainer.namePlate.children[1];
+			// 	window.stage.overlayContainer.namePlate.x = window.stage.overlayContainer.namePlate.sprite._x + window.stage.overlayContainer.namePlate.sprite.width / 2 - textElement.width /2;
+			// 	window.stage.overlayContainer.namePlate.y = sprite.getBounds().bottom + 3;
+			// 	console.log(window.stage.overlayContainer.namePlate.y, sprite.getBounds());
+			// 	}, 1);
+			// }
 			
 		}
 		return;

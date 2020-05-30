@@ -526,59 +526,88 @@ export default {
 
     onSpriteOver(e) {
 
-      var sprite = e.currentTarget;
+      //var sprite = e.currentTarget;
 
       if (!this.app.stage.overlayContainer.namePlate) 
       {
         this.app.stage.overlayContainer.namePlate = this.app.stage.overlayContainer.addChild(new PIXI.Container());
         this.app.stage.overlayContainer.namePlate.addChild( new PIXI.Graphics());
         this.app.stage.overlayContainer.namePlate.addChild( new PIXI.Text());
+        this.app.stage.overlayContainer.namePlate.update = function(sprite) {
+
+          if (sprite)
+          if(!sprite.isSprite)
+          {
+            console.log("missing sprite2"); 
+          }
+
+          let namePlate = this;
+
+          let boxElement = namePlate.children[0];
+          let textElement = namePlate.children[1];
+
+          if (sprite) // && e.data.originalEvent.buttons != 1) 
+          {
+            textElement.text = sprite.name || "undefined";
+            namePlate.visible = true;
+            namePlate.sprite = sprite;
+          } else
+          {
+            sprite = namePlate.sprite; // used later in this function
+          }
+          if (!sprite)
+          {
+            console.log("missing sprite");
+          }
+          if (!sprite.isSprite)
+          {
+            console.log("missing sprite"); 
+          }
+
+          // Text Element
+          var scale = 1 /  Math.sqrt(window.stage.scale.x);
+          if (scale > 1) {
+            scale = 1 / window.stage.scale.x;
+          }
+          if (textElement)
+          {
+            textElement.style.fontSize = (2 * scale).toFixed(2) + "em";
+            textElement.resolution = Math.max(1, window.stage.scale.x).toFixed(2);
+          }
+
+          // Box Element
+          if (textElement && boxElement)
+          {
+            if (textElement.height && textElement.width)
+            {
+              boxElement.clear();
+              boxElement.lineStyle(2 / window.stage.scale.x, 0xaaaaff);
+              boxElement.beginFill(0x9999ff);
+              let pad = Math.floor(textElement.height / 4);
+              boxElement.drawRoundedRect(
+                textElement.x - pad, 
+                textElement.y, 
+                textElement.width + pad * 2, 
+                textElement.height, 
+                6);
+              boxElement.endFill();
+            }
+            
+          }
+
+          //let textElement = namePlate.children[1];
+          //let sprite = namePlate.sprite;
+          namePlate.x = sprite._x + sprite.width / 2 - textElement.width /2;
+          namePlate.y = sprite._y + sprite.getBounds().height / window.stage.scale.x;
+          //console.log(namePlate.y, sprite.getBounds().height / window.stage.scale.x);
+
+        };
 
       }
 
-      let boxElement = this.app.stage.overlayContainer.namePlate.children[0];
-      let textElement = this.app.stage.overlayContainer.namePlate.children[1];
+      
 
-      if (sprite) // && e.data.originalEvent.buttons != 1) 
-      {
-        textElement.text = sprite.name || "undefined";
-        this.app.stage.overlayContainer.namePlate.visible = true;
-        this.app.stage.overlayContainer.namePlate.sprite = sprite;
-      } 
-
-      // Text Element
-      var scale = 1 /  Math.sqrt(this.app.stage.scale.x);
-      if (scale > 1) {
-        scale = 1 / this.app.stage.scale.x;
-      }
-      if (textElement)
-      {
-        textElement.style.fontSize = (2 * scale).toFixed(2) + "em";
-        textElement.resolution = Math.max(1, this.app.stage.scale.x).toFixed(2);
-      }
-
-
-      // Box Element
-      if (textElement && boxElement)
-      {
-        if (textElement.height && textElement.width)
-        {
-          boxElement.clear();
-          boxElement.lineStyle(2 / this.app.stage.scale.x, 0xaaaaff);
-          boxElement.beginFill(0x9999ff);
-          let pad = Math.floor(textElement.height / 4);
-          boxElement.drawRoundedRect(
-            textElement.x - pad, 
-            textElement.y, 
-            textElement.width + pad * 2, 
-            textElement.height, 
-            6);
-          boxElement.endFill();
-        }
-        
-      }
-
-      this.PositionNamePlate(sprite);
+      window.stage.overlayContainer.namePlate.update(e.currentTarget);
 
 
     },
@@ -654,21 +683,24 @@ export default {
           sprite.y = y;
           sprite.SetOrigin();
 
-          this.PositionNamePlate(sprite);
+          //this.PositionNamePlate(sprite);
+          window.stage.overlayContainer.namePlate.update();
 
         e.stopPropagation();
       }
     },
 
-    PositionNamePlate(sprite)
-    {
-        if (this.app.stage.overlayContainer.namePlate && sprite)
-        {
-          let textElement = this.app.stage.overlayContainer.namePlate.children[1];
-          this.app.stage.overlayContainer.namePlate.x = this.app.stage.overlayContainer.namePlate.sprite._x + this.app.stage.overlayContainer.namePlate.sprite.width / 2 - textElement.width /2;
-          this.app.stage.overlayContainer.namePlate.y = sprite.getBounds().bottom + 3;
-        }
-    },
+    // PositionNamePlate(sprite)
+    // {
+    //     if (this.app.stage.overlayContainer.namePlate && sprite)
+    //     {
+    //       let namePlate = this.app.stage.overlayContainer.namePlate;
+    //       let textElement = namePlate.children[1];
+    //       namePlate.x = sprite._x + sprite.width / 2 - textElement.width /2;
+    //       namePlate.y = sprite._y + sprite.getBounds().height / window.stage.scale.x;
+    //       console.log(namePlate.y, sprite.getBounds().height / window.stage.scale.x);
+    //     }
+    // },
 
 
     DeselectAllSprites() {
@@ -918,6 +950,7 @@ export default {
       //this.selectedSprite.__OnMove(true);
       // drawVbl();
       //drawVP();
+      window.stage.overlayContainer.namePlate.update();
       this.stageResize();
     },
 
