@@ -1,1 +1,1 @@
-window.appVer = '0.1.1 (Sun May 31 2020)';
+window.appVer = '0.1.8 (Sun May 31 2020)';

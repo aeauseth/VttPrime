@@ -88,7 +88,7 @@
             />
             </pane>
             <pane size="20">
-              ChatPane
+              Version: {{ appVer() }}
             </pane>
           </splitpanes>
         </pane>
@@ -249,6 +249,9 @@ export default {
 
   methods: {
 
+    appVer() {
+      return window.appVer;
+    },
 
     toolButtonClick (event)
     {
@@ -370,7 +373,6 @@ export default {
 
   },
   mounted() {
-    console.log("mounted appVer " + window.appVer);
 
     window.addEventListener('resize', this.onResize);
     

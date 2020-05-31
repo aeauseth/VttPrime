@@ -1,13 +1,13 @@
 {
   "name": "vttprime",
-  "version": "0.2.1",
+  "version": "0.1.8",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "build": "(npm version patch --no-git-tag-version) & (node versionUpdate) & (vue-cli-service build)",
     "lint": "vue-cli-service lint",
     "deploy": "aws s3 sync ./dist s3://vttprime",
-    "test": "node versionUpdate"
+    "test": "(npm version patch --no-git-tag-version) & (node versionUpdate) & (type src\\appVer.js)"
   },
   "dependencies": {
     "@pixi/filter-drop-shadow": "^3.1.1",
