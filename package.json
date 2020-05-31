@@ -10,6 +10,7 @@
     "test": "(npm version patch --no-git-tag-version) & (node versionUpdate) & (type src\\appVer.js)"
   },
   "dependencies": {
+    "@doodle3d/clipper-js": "^1.0.11",
     "@pixi/filter-drop-shadow": "^3.1.1",
     "core-js": "^3.6.4",
     "jquery": "^3.5.1",
@@ -50,7 +51,9 @@
       "parser": "babel-eslint"
     },
     "rules": {
-      "no-unused-vars": "warn"
+      "no-unused-vars": "warn",
+      "no-constant-condition": "warn",
+      "no-redeclare": "warn"
     }
   },
   "browserslist": [

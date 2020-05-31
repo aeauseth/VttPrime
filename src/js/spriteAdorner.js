@@ -246,6 +246,8 @@ function onResizeMove(e)
 					// Update adorner
 					resizer.sprite.addAdorner();
 
+					window.stage.background.updateVlb();
+
       }
 
 }

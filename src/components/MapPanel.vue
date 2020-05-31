@@ -96,6 +96,7 @@
 <script>
 
 import * as MAZE from '../js/maze.js'
+import * as VLB from '../js/vlb.js'
 
 
 import * as PIXI from 'pixi.js';
@@ -468,14 +469,31 @@ export default {
       this.AddSpriteHandlers(frostGiant4);
       this.layers.token.addChild(frostGiant4);
 
+      // Vislble Line Blocking (VLB)
+      this.layers.vlb = layersContainer.addChild(new PIXI.Container());
+      this.layers.vlb.name = "vlb";
+      stage.vlb = this.layers.vlb;
+
 
 
       // Layers Z index (used to sort layers)
       layersContainer.children.forEach( e => {
         this.layersZindex.splice(this.layersZindex, 0, e);
         e.interactiveChildren = false;  // default to no interaction
+        
       });
-      this.layersZindex[0].interactiveChildren = true;  // top layer (likely token) is active layer
+
+      // Default to TOKEN layer
+      for (var i = 0; i< this.layersZindex.length; i++)
+      {
+        let layer = this.layersZindex[i];
+        if (layer.name == "token")
+        {
+          this.layersSelectedIndex = i;
+          this.layersZindex[i].interactiveChildren = true;
+          break;
+        }
+      }
 
       // Handlers
       stage.interactive = true;
@@ -686,6 +704,11 @@ export default {
           //this.PositionNamePlate(sprite);
           window.stage.overlayContainer.namePlate.update();
 
+          if (this.activeLayer().name == "background")
+          {
+            this.layers.background.updateVlb();
+          }
+
         e.stopPropagation();
       }
     },
@@ -732,6 +755,8 @@ export default {
       var myMaze = MAZE.create(13,9);
       var texture = PIXI.Texture.from("Concrete-a5x5.png");
       MAZE.draw(myMaze, PIXI, this.layers.background, texture, this.AddSpriteHandlers);
+
+      this.layers.background.updateVlb();
 
 
       this.updateDiag();
@@ -950,7 +975,10 @@ export default {
       //this.selectedSprite.__OnMove(true);
       // drawVbl();
       //drawVP();
-      window.stage.overlayContainer.namePlate.update();
+      if (window.stage.overlayContainer.namePlate)
+      {
+        window.stage.overlayContainer.namePlate.update();
+      }
       this.stageResize();
     },
 
