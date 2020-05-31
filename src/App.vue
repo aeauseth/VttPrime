@@ -193,6 +193,8 @@
 
 <script>
 
+import "./appVer.js"
+
 // SplitPanes
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
@@ -368,7 +370,8 @@ export default {
 
   },
   mounted() {
-    //console.log("mounted");
+    console.log("mounted appVer " + window.appVer);
+
     window.addEventListener('resize', this.onResize);
     
     //Prevent DRAGOVER and DROP to browser
