@@ -236,12 +236,14 @@ function onResizeMove(e)
 						height = Math.max(25, Math.round(height / 25)*25);
 					}
 
-					resizer.x = width;
-					resizer.y = height;
-
+					// Update sprite size
 					resizer.sprite.width = width;
 					resizer.sprite.height = height;
 
+					// Hack reposition (x/y are center, _x/_y are actual)
+					resizer.sprite.SetOriginR()
+
+					// Update adorner
 					resizer.sprite.addAdorner();
 
       }
@@ -298,10 +300,9 @@ PIXI.Container.prototype.removeAdorner = function ()
 	//console.log(this);
 	deleteAdorner(this);
 }
+
 PIXI.Sprite.prototype.SetOrigin = function ()
 {
-	
-
 	// Pivot alters the origin; workaround
 	if (this._x == undefined) {
 		this._x = this.x;
@@ -314,6 +315,20 @@ PIXI.Sprite.prototype.SetOrigin = function ()
 		this._x = this.x - this.width /2;
 		this._y = this.y - this.height /2;
 	}
+	
+	if (this.adorner)
+	{
+		this.adorner.x = this.x;
+		this.adorner.y = this.y;
+	}
+}
+
+PIXI.Sprite.prototype.SetOriginR = function ()
+{
+	// Set x/y based on _x/_y as authoritive
+	this.x = this._x + this.width /2;
+	this.y = this._y + this.height /2;
+	
 	
 	if (this.adorner)
 	{
