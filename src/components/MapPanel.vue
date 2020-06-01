@@ -97,6 +97,7 @@
 
 import * as MAZE from '../js/maze.js'
 import * as VLB from '../js/vlb.js'
+import * as LOS from '../js/los.js'
 
 
 import * as PIXI from 'pixi.js';
@@ -204,7 +205,9 @@ export default {
           {name: "one"},
           {name: "two"},
           {name: "three"}
-        ]
+        ],
+        vlbGenerationAndDrawMs: 0,
+        losGenerationAndDrawMs: 0,
 
     }
   },
@@ -242,6 +245,8 @@ export default {
       //console.log(this.DiagProps[0]);
       this.DiagProps[0].children[0].name = "Containers: " + this.countAllContainers();
       this.DiagProps[0].children[1].name = "Textures: " + Object.keys(PIXI.utils.TextureCache).length;
+      this.DiagProps[0].children[2].name = "VBL: " + this.vlbGenerationAndDrawMs + " ms [" + this.layers.vlb.segments.length + "]";
+      this.DiagProps[0].children[3].name = "LOS: " + this.losGenerationAndDrawMs + " ms";
       
     //    diagItems: [
     //     {
@@ -473,8 +478,12 @@ export default {
       this.layers.vlb = layersContainer.addChild(new PIXI.Container());
       this.layers.vlb.name = "vlb";
       stage.vlb = this.layers.vlb;
+      this.layers.vlb.segments = [];
 
-
+      // Vislble Line Blocking (LOS)
+      this.layers.los = layersContainer.addChild(new PIXI.Container());
+      this.layers.los.name = "los";
+      stage.los = this.layers.los;
 
       // Layers Z index (used to sort layers)
       layersContainer.children.forEach( e => {
@@ -539,6 +548,8 @@ export default {
       // Anchor fix
       sprite.anchor.set(0.5, 0.5);
       sprite.SetOrigin();
+
+      
 
     },
 
@@ -661,6 +672,12 @@ export default {
       sprite.data.dragOffset.x = sprite.data.dragOffset.x - sprite.x;
       sprite.data.dragOffset.y = sprite.data.dragOffset.y - sprite.y;
 
+      if (this.activeLayer().name == "token")
+      {
+        this.losGenerationAndDrawMs = sprite.updateLos();
+        this.updateDiag();
+      }
+
       e.stopPropagation();
     },
 
@@ -706,7 +723,14 @@ export default {
 
           if (this.activeLayer().name == "background")
           {
-            this.layers.background.updateVlb();
+            this.vlbGenerationAndDrawMs = this.layers.background.updateVlb();
+            this.updateDiag();
+          }
+
+          if (this.activeLayer().name == "token")
+          {
+            this.losGenerationAndDrawMs = sprite.updateLos();
+            this.updateDiag();
           }
 
         e.stopPropagation();
@@ -732,6 +756,16 @@ export default {
         window.stage.selectedItems[0].removeAdorner();
         window.stage.selectedItems = [];
       }
+
+      // Clear LOS
+      if (window.stage.los)
+      {
+        if (window.stage.los.children[0])
+        {
+          window.stage.los.children[0].clear();
+        }
+      }
+
     },
 
 
@@ -756,7 +790,10 @@ export default {
       var texture = PIXI.Texture.from("Concrete-a5x5.png");
       MAZE.draw(myMaze, PIXI, this.layers.background, texture, this.AddSpriteHandlers);
 
-      this.layers.background.updateVlb();
+      //this.layers.background.updateVlb();
+      // Hack dealy because sprite are not loaded yet
+      window.setTimeout(function() {this.vlbGenerationAndDrawMs = this.layers.background.updateVlb()}, 1000 );
+      this.updateDiag();
 
 
       this.updateDiag();
@@ -788,7 +825,7 @@ export default {
         this.prevMousePosition = {};
       }
 
-      this.DiagProps[0].children[2].name = "Mouse: " + Math.floor(this.mousePosition.x) + "x " + Math.floor(this.mousePosition.y) + "y";
+      this.DiagProps[0].children[4].name = "Mouse: " + Math.floor(this.mousePosition.x) + "x " + Math.floor(this.mousePosition.y) + "y";
     },
 
     stageResize() {

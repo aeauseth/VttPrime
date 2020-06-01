@@ -158,15 +158,8 @@ function onDocumentMouseWheel(e)
 
 			// Position nameplate
 			window.stage.overlayContainer.namePlate.update();
-			// if (window.stage.overlayContainer.namePlate)
-			// {
-			// 	setTimeout(function() {
-			// 	let textElement = window.stage.overlayContainer.namePlate.children[1];
-			// 	window.stage.overlayContainer.namePlate.x = window.stage.overlayContainer.namePlate.sprite._x + window.stage.overlayContainer.namePlate.sprite.width / 2 - textElement.width /2;
-			// 	window.stage.overlayContainer.namePlate.y = sprite.getBounds().bottom + 3;
-			// 	console.log(window.stage.overlayContainer.namePlate.y, sprite.getBounds());
-			// 	}, 1);
-			// }
+
+			window.layers["background"].updateVlb();
 			
 		}
 		return;
@@ -232,8 +225,8 @@ function onResizeMove(e)
 
 					// Hold CTRL key for size snap
 					if (e.data.originalEvent.ctrlKey) {
-						width = Math.max(25, Math.round(width / 25)*25);
-						height = Math.max(25, Math.round(height / 25)*25);
+						width = Math.max(25, Math.round(width / 50) * 50);
+						height = Math.max(25, Math.round(height / 50) * 50);
 					}
 
 					// Update sprite size
@@ -246,7 +239,7 @@ function onResizeMove(e)
 					// Update adorner
 					resizer.sprite.addAdorner();
 
-					window.stage.background.updateVlb();
+					window.layers["background"].updateVlb();
 
       }
 

@@ -34,9 +34,14 @@ PIXI.Container.prototype.updateVlb = function ()
         ClipperLib.PolyFillType.pftNonZero, 
         ClipperLib.PolyFillType.pftNonZero);
 
-    console.log("Autogeneration of VLB took " + (performance.now() - diagStart).toFixed(1) + "ms");
+    
+    //console.log("Autogeneration of VLB took " + (performance.now() - diagStart).toFixed(1) + "ms");
     
     drawVlb(solution_paths);
+
+    var DiagMs = (performance.now() - diagStart).toFixed(1);
+
+    return (DiagMs)
 
     //console.log(clipPaths, solution_paths);
 
@@ -54,10 +59,15 @@ function drawVlb(paths)
         graphics = new PIXI.Graphics();
         vlbContainer.addChild(graphics);
     }
+
+    // Line segments are used for Line Of Sight (LOS)
+    vlbContainer.segments = [];
     
+    // Clear previous and set line style
     graphics.clear();
     graphics.lineStyle(2, 0x0000ff, 1);
 
+    // Draw lines (paths)
     for (var i = 0; i < paths.length; i++) {
 		var lastPt = undefined;
         for (var j = 0; j < paths[i].length; j++) {
@@ -69,7 +79,7 @@ function drawVlb(paths)
             else {
 
 				graphics.lineTo(paths[i][j].X, paths[i][j].Y);
-				//window.segments.push([lastPt, [paths[i][j].X, paths[i][j].Y] ]);
+				vlbContainer.segments.push([lastPt, [paths[i][j].X, paths[i][j].Y] ]);
 				lastPt = [paths[i][j].X, paths[i][j].Y];
 
 
@@ -77,7 +87,7 @@ function drawVlb(paths)
 			
 
 		}
-		//window.segments.push([lastPt, [paths[i][0].X, paths[i][0].Y]]);
+		vlbContainer.segments.push([lastPt, [paths[i][0].X, paths[i][0].Y]]);
         graphics.lineTo(paths[i][0].X, paths[i][0].Y);
 
 	}
@@ -87,25 +97,48 @@ function drawVlb(paths)
     
 function addClipPaths(container, clipPaths)
 {
-    for (var i = 0, len = container.children.length; i < len; i++) {
-    //for (var i = 0, len = 3; i < len; i++) {
+	for (var i = 0, len = container.children.length; i < len; i++) {
+	//for (var i = 0, len = 1; i < len; i++) {
 
-        var child = container.children[i];
-        if (child instanceof PIXI.Sprite) {
-            // Clockwise winding is important
-            var cp = [
-                { X: child._x, Y: child._y },
-                { X: child._x + child.width, Y: child._y },
-                { X: child._x + child.width, Y: child._y + child.height },
-                { X: child._x, Y: child._y + child.height }
-            ];
-            clipPaths.push(cp);
-        }
-        else {
-            //console.log(child, "has " + child.children.length + " children");
-            addClipPaths(child);
-        }
-    }
+		var child = container.children[i];
+		var stage = window.stage;
+		if (child instanceof PIXI.Sprite) {
+			// Clockwise winding is important
+			var cp = [
+					{ X: child._x, Y: child._y },
+					{ X: child._x + child.width, Y: child._y },
+					{ X: child._x + child.width, Y: child._y + child.height },
+					{ X: child._x, Y: child._y + child.height }
+			];
+			child.calculateVertices();
+			var vertexData = []
+			for (let j = 0; j < child.vertexData.length; j++)
+			{
+				// X
+				if (j % 2 == 0)
+				{
+					vertexData.push((child.vertexData[j] - stage.x) / stage.scale.x );
+				}
+				else
+				// Y
+				{
+					vertexData.push(( child.vertexData[j] - stage.y) / stage.scale.y );
+				}
+				
+			}
+			var cp2 = [
+				{ X: vertexData[0], Y: vertexData[1] },
+				{ X: vertexData[2], Y: vertexData[3] },
+				{ X: vertexData[4], Y: vertexData[5] },
+				{ X: vertexData[6], Y: vertexData[7] },
+			];
+			clipPaths.push(cp2);
+		}
+		else {
+				//console.log(child, "has " + child.children.length + " children");
+				addClipPaths(child);
+		}
+	}
 }
 
 

@@ -136,17 +136,15 @@
             <li><a href="https://antoniandre.github.io/splitpanes/" target="_blank">Vue Split Panes</a>: UI Layout</li>
             <li><a href="https://www.pixijs.com/" target="_blank">PixiJS</a>: Graphics</li>
             <li><a href="https://github.com/SortableJS/Vue.Draggable" target="_blank">vuedraggable</a>: drag list items (e.g. layers)</li>
-            <li><a href="https://github.com/pixijs/pixi.js/issues/1333" target="_blank">drawDashedPolygon</a></li>
+            <li><a href="https://github.com/pixijs/pixi.js/issues/1333" target="_blank">drawDashedPolygon</a>: Extend PIXI to draw dashed lines</li>
+            <li><a href="https://sourceforge.net/p/jsclipper/wiki/documentation/#clipperlibclipperexecute" target="_blank">ClipperJS</a>: Visible Line Blocking</li>
+            <li><a href="https://github.com/byronknoll/visibility-polygon-js" target="_blank">Visibility_Polygon</a>: Line of sight</li>
           </ul>
           </p>
           <p>Inspired by:
             <ul>
-              <li>
-                <a href="https://www.rptools.net/" target="_blank">RPTools Maptool</a>
-              </li>
-              <li>
-                <a href="https://codepen.io/ardenpm/pen/pVojYG" target="_blank">Pixi Grid Shader</a>
-              </li>
+              <li><a href="https://www.rptools.net/" target="_blank">RPTools Maptool</a></li>
+              <li><a href="https://app.roll20.net/" target="_blank">Roll20</a></li>
             </ul>
           </p>
 
@@ -238,9 +236,11 @@ export default {
           id: 100,
           name: 'PIXI :',
           children: [
-            { id: 101, name: 'Containers:' },
-            { id: 102, name: 'Textures:' },
-            { id: 103, name: 'Mouse:' },
+            { id: 100, name: 'Containers:' },
+            { id: 101, name: 'Textures:' },
+            { id: 102, name: 'VLB:' },
+            { id: 103, name: 'LOS:' },
+            { id: 104, name: 'Mouse:' },
           ],
         },
     ],
