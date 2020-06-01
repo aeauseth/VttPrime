@@ -1,10 +1,10 @@
 {
   "name": "vttprime",
-  "version": "0.1.8",
+  "version": "0.1.10",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "(npm version patch --no-git-tag-version) & (node versionUpdate) & (vue-cli-service build)",
+    "build": "(node versionUpdate) & (vue-cli-service build) & (npm version patch --no-git-tag-version)",
     "lint": "vue-cli-service lint",
     "deploy": "aws s3 sync ./dist s3://vttprime",
     "test": "(npm version patch --no-git-tag-version) & (node versionUpdate) & (type src\\appVer.js)"
