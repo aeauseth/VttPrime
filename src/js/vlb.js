@@ -26,13 +26,13 @@ PIXI.Container.prototype.updateVlb = function ()
 
     cpr.AddPath(clipPaths[0], ClipperLib.PolyType.ptSubject, true);
     for (var i = 1; i < clipPaths.length; i++) {
-        cpr.AddPath(clipPaths[i], ClipperLib.PolyType.ptClip, true);
+        cpr.AddPath(clipPaths[i], ClipperLib.PolyType.ptSubject, true);
     }
     
     cpr.Execute(ClipperLib.ClipType.ctUnion, 
-        solution_paths); //, 
-        //ClipperLib.PolyFillType.pftNonZero, 
-        //ClipperLib.PolyFillType.pftNonZero);
+        solution_paths, 
+        ClipperLib.PolyFillType.pftNonZero, 
+        ClipperLib.PolyFillType.pftNonZero);
 
     console.log("Autogeneration of VLB took " + (performance.now() - diagStart).toFixed(1) + "ms");
     
@@ -46,7 +46,6 @@ PIXI.Container.prototype.updateVlb = function ()
 
 function drawVlb(paths)
 {
-    console.log(paths);
     var vlbContainer = window.stage.vlb;
 
     var graphics = vlbContainer.children[0];
@@ -62,7 +61,6 @@ function drawVlb(paths)
     for (var i = 0; i < paths.length; i++) {
 		var lastPt = undefined;
         for (var j = 0; j < paths[i].length; j++) {
-            console.log(paths[i][j].X, paths[i][j].Y);
             if (!j) {
                 
 				graphics.moveTo(paths[i][j].X, paths[i][j].Y);
@@ -89,11 +87,12 @@ function drawVlb(paths)
     
 function addClipPaths(container, clipPaths)
 {
-    //for (var i = 0, len = container.children.length; i < len; i++) {
-    for (var i = 0, len = 3; i < len; i++) {
+    for (var i = 0, len = container.children.length; i < len; i++) {
+    //for (var i = 0, len = 3; i < len; i++) {
 
         var child = container.children[i];
         if (child instanceof PIXI.Sprite) {
+            // Clockwise winding is important
             var cp = [
                 { X: child._x, Y: child._y },
                 { X: child._x + child.width, Y: child._y },
