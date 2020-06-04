@@ -10,6 +10,13 @@ PIXI.Container.prototype.updateLos = function ()
     const vlbContainer = window.stage.vlb;
     const segments = vlbContainer.segments;
 
+    // var maxLos = [
+    //     [ [-1000, -1000], [1000, -1000] ],
+    //     [ [1000, -1000], [1000, 1000] ],
+    //     [ [1000, 1000], [-1000, 1000] ],
+    //     [ [-1000, 1000], [-1000, -1000] ],
+    // ]
+
     var graphics = losContainer.children[0];
     if (!graphics)
     {
@@ -21,7 +28,10 @@ PIXI.Container.prototype.updateLos = function ()
     graphics.clear();
     graphics.lineStyle(1, 0xffff00, 1);
 
-    var results = VisibilityPolygon.VisibilityPolygon.compute([this.x, this.y], segments);
+    //var results = VisibilityPolygon.VisibilityPolygon.compute([this.x, this.y], segments);
+    var results = VisibilityPolygon.VisibilityPolygon.computeViewport([this.x, this.y], segments, 
+        [this.x - 1000, this.y -1000], 
+        [this.x + 1000, this.y +1000] );
 
     graphics.beginFill(0xffff00, 0.5);
     for (let i = 0; i < results.length; i++) {

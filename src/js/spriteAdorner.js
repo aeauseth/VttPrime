@@ -83,12 +83,14 @@ var createAdorner = function (sprite) {
     polygons.push({ x: sprite.width, y: sprite.height });
     polygons.push({ x: 0, y: sprite.height });
     var step = 5 / stage.scale.x;
-		dashRect.drawDashedPolygon(polygons, 0, 0, 0, step, step * 1.5, 0);
-		
-		// Mouse Move Handler
-		sprite.on("mousemove", onDragMove);
+	dashRect.drawDashedPolygon(polygons, 0, 0, 0, step, step * 1.5, 0);
 
-		// Resize Handle
+	// Mouse Move Handler
+	sprite.on("mousemove", onDragMove);
+
+	// Resize Handle
+	if (window.layers.activeLayer.freeSize)
+	{
 		var resizer = boundingBox.children[2];
 		if (!resizer) 
 		{
@@ -112,11 +114,12 @@ var createAdorner = function (sprite) {
 
 		resizer.x = sprite.width;
 		resizer.y = sprite.height;
+	}
 
-		// Pivot
-		//sprite.adorner.pivot.set(0.5, 0.5);
-		boundingBox.pivot.set(sprite.width /2, sprite.height /2);
-		sprite.SetOrigin();
+	// Pivot
+	//sprite.adorner.pivot.set(0.5, 0.5);
+	boundingBox.pivot.set(sprite.width /2, sprite.height /2);
+	sprite.SetOrigin();
 
 
 }

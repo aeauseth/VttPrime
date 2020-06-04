@@ -450,9 +450,7 @@ export default {
       // TOKEN layer
       this.layers.token = layersContainer.addChild(new PIXI.Container());
       this.layers.token.name = "token";
-      
 
-      
       const texture = PIXI.Texture.from("wizard7.png");
       var wizard7 = new PIXI.Sprite(texture);
       wizard7.x = 0;
@@ -502,6 +500,13 @@ export default {
           this.layersZindex[i].interactiveChildren = true;
           break;
         }
+      }
+
+      // Default Layer Propertes
+      for (var i = 0; i< this.layersZindex.length; i++)
+      {
+        let layer = this.layersZindex[i];
+        if (layer.name == "token") layer.freeSize = false; else layer.freeSize = true;
       }
 
       // Handlers
@@ -672,7 +677,7 @@ export default {
       sprite.data.dragOffset.x = sprite.data.dragOffset.x - sprite.x;
       sprite.data.dragOffset.y = sprite.data.dragOffset.y - sprite.y;
 
-      if (this.activeLayer().name == "token")
+      if (window.layers.activeLayer.name == "token")
       {
         this.losGenerationAndDrawMs = sprite.updateLos();
         this.updateDiag();
@@ -721,13 +726,13 @@ export default {
           //this.PositionNamePlate(sprite);
           window.stage.overlayContainer.namePlate.update();
 
-          if (this.activeLayer().name == "background")
+          if (window.layers.activeLayer.name == "background")
           {
             this.vlbGenerationAndDrawMs = this.layers.background.updateVlb();
             this.updateDiag();
           }
 
-          if (this.activeLayer().name == "token")
+          if (window.layers.activeLayer.name == "token")
           {
             this.losGenerationAndDrawMs = sprite.updateLos();
             this.updateDiag();
@@ -1100,7 +1105,7 @@ export default {
       
       sprite.name = file.name.split(".")[0];
       this.AddSpriteHandlers(sprite);
-      this.activeLayer().addChild(sprite);
+      window.activeLayer.addChild(sprite);
       sprite.x = this.mousePosition.x - sprite.width / 2;
       sprite.y = this.mousePosition.y - sprite.height / 2;
 
@@ -1118,10 +1123,7 @@ export default {
       }
     },
     
-    activeLayer() {
-      //console.log(this.layersZindex, this.layersSelectedIndex);
-      return this.layersZindex[this.layersSelectedIndex];
-    }
+    
   },
   
   
@@ -1220,6 +1222,7 @@ export default {
             }
           }
         }
+        window.layers.activeLayer = this.layersZindex[this.layersSelectedIndex];
       });
     }
 
@@ -1240,6 +1243,7 @@ export default {
           //console.log("-", child.name);
         }
       });
+      window.layers.activeLayer = this.layersZindex[this.layersSelectedIndex];
     },
 
     // IsShowAllBoundingActive: {

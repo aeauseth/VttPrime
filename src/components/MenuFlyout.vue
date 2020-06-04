@@ -57,6 +57,7 @@ export default {
 					{ label: 'Create Maze',  menu: [
 						{ label: '5 x 5' , Action: { function: 'Do_CreateMaze', props: {x: 5, y: 5} } },
 						{ label: '13 x 9', Action: { function: 'Do_CreateMaze', props: {x: 13, y: 9} } },
+						{ label: '33 x 33', Action: { function: 'Do_CreateMaze', props: {x: 33, y: 33} } },
 					]},
 				]},
 				{ label: 'Help', menu: [
@@ -71,7 +72,7 @@ export default {
       return {
         '--base-font-size': '0.5rem',
         '--menu-silver': '#eee',
-        '--menu-border': '#9c73ba', //'#dedede',
+        '--menu-border': '#ded0e8', //'#dedede',
         '--menu-focused': 'indigo', //'#1e88e5',
         '--menu-separator': '#cdb9dc', //'#ccc',
         '--menu-text-color': '#333',
