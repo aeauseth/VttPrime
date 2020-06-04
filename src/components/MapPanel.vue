@@ -777,6 +777,27 @@ export default {
       }
     },
 
+    Do_CreateMaze(props)
+    {
+      var x = props.x || 3;
+      var y = props.y || 3;
+
+      console.log("Creating Maze: %s by %s", x, y);
+      this.ResetPixi();
+
+      this.createLayers();
+
+      //var myMaze = new MAZE();
+      var myMaze = MAZE.create(x,y);
+      var texture = PIXI.Texture.from("Concrete-a5x5.png");
+      MAZE.draw(myMaze, PIXI, this.layers.background, texture, this.AddSpriteHandlers);
+
+      //this.layers.background.updateVlb();
+      // Hack dealy because sprite are not loaded yet
+      window.setTimeout(function() {this.vlbGenerationAndDrawMs = this.layers.background.updateVlb()}, 1000 );
+      this.updateDiag();
+
+    },
 
     CreateMap_Basic1()
     {
@@ -793,9 +814,6 @@ export default {
       //this.layers.background.updateVlb();
       // Hack dealy because sprite are not loaded yet
       window.setTimeout(function() {this.vlbGenerationAndDrawMs = this.layers.background.updateVlb()}, 1000 );
-      this.updateDiag();
-
-
       this.updateDiag();
     },
 

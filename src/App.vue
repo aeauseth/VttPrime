@@ -67,82 +67,14 @@
       </template>
     </v-app-bar> -->
 
-    <v-app-bar
-      app
-      color="yellow"
-      
-      height="20px"
-      clipped-left>
-
-      <nav class="flyout-nav" :style="cssVars">
-    <ul>
-      <li>
-        <a href="#"><span class="label">File11</span></a>
-        <ul>
-          <li>
-            <a href="#">
-              <span class="label">New Tab</span>
-              <span class="shortcut">⌘T</span>
-            </a>
-          </li>
-          <li>
-            <a href="#">
-              <span class="label">New Window</span>
-              <span class="shortcut">⌘N</span>
-            </a>
-          </li>
-          <li class="separator"></li>
-          <li class="has-children">
-            <a href="#">
-              <span class="label">Share...</span>
-            </a>
-            <ul>
-              <li>
-                <a href="#">
-                  <span class="label">✉️ Email</span>
-                </a>
-              </li>
-              <li>
-                <a href="#">
-                  <span class="label">💬 Messages</span>
-                </a>
-              </li>
-            </ul>
-          </li>
-        </ul>
-      </li>
-
-      <li>
-        <a href="#"><span class="label">Edit</span></a>
-      </li>
-
-      <li>
-        <a href="#"><span class="label">Notes</span></a>
-      </li>
-
-      <li>
-        <a href="#"><span class="label">Test</span></a>
-        <ul>
-          <li>
-            <a href="#">
-              <span class="label">Basic Map 1</span>
-            </a>
-          </li>
-        </ul>
-      </li>
-
-      <li>
-        <a href="#"><span class="label">About</span></a>
-      </li>
-
-    </ul>
-</nav>
-
-
+    <v-app-bar 
+        app
+          dense
+          height="19px"
+          >
+        <MenuFlyout>
+        </MenuFlyout>
     </v-app-bar>
-    
-
-    
 
     <v-content>
       <splitpanes class="default-theme" @resized="onResize('resized1', $event)" >
@@ -270,6 +202,7 @@ import "./appVer.js"
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
 import MapPanel from './components/MapPanel';
+import MenuFlyout from './components/MenuFlyout';
 
 
 export default {
@@ -278,6 +211,7 @@ export default {
   components: {
     Splitpanes, Pane,
     MapPanel,
+    MenuFlyout,
   },
 
   data: () => ({
@@ -321,29 +255,29 @@ export default {
   }),
 
   computed: {
-    cssVars() { // REF: https://www.ghosh.dev/posts/creating-a-multi-level-hierarchical-flyout-navigation-menu-using-only-html-and-css/
-      return {
-        '--bg-color': this.bgColor,
-        '--height': this.height + 'px',
+    // cssVars() { // REF: https://www.ghosh.dev/posts/creating-a-multi-level-hierarchical-flyout-navigation-menu-using-only-html-and-css/
+    //   return {
+    //     '--bg-color': this.bgColor,
+    //     '--height': this.height + 'px',
 
-        '--page-bg': '#607d8b',
-        '--base-font-size': '16px', // becomes 1rem
-        '--menu-silver': '#eee',
-        '--menu-border': '#dedede',
-        '--menu-focused': '#1e88e5',
-        '--menu-separator': '#ccc',
-        '--menu-text-color': '#333',
-        '--menu-shortcut-color': '#999',
-        '--menu-focused-text-color': '#fff',
-        '--menu-text-color-disabled': '#999',
-        '--menu-border-width': '1px',
-        '--menu-shadow': '2px 2px 3px -3px $menu-text-color',
-        '--menu-content-padding': '0.5rem 1rem 0.5rem 1.75rem',
-        '--menu-border-radius': '0.5rem',
-        '--menu-top-padding': '0.25rem',
+    //     '--page-bg': '#607d8b',
+    //     '--base-font-size': '16px', // becomes 1rem
+    //     '--menu-silver': '#eee',
+    //     '--menu-border': '#dedede',
+    //     '--menu-focused': '#1e88e5',
+    //     '--menu-separator': '#ccc',
+    //     '--menu-text-color': '#333',
+    //     '--menu-shortcut-color': '#999',
+    //     '--menu-focused-text-color': '#fff',
+    //     '--menu-text-color-disabled': '#999',
+    //     '--menu-border-width': '1px',
+    //     '--menu-shadow': '2px 2px 3px -3px $menu-text-color',
+    //     '--menu-content-padding': '0.5rem 1rem 0.5rem 1.75rem',
+    //     '--menu-border-radius': '0.5rem',
+    //     '--menu-top-padding': '0.25rem',
 
-      }
-    }
+    //   }
+    // }
   },
 
   methods: {
@@ -402,7 +336,7 @@ export default {
 			return text.replace(h, "<u>" + h + "</u>");
     },
     
-    doAction (action)
+    DoAction (action)
     {
       if (action)
       {
@@ -426,7 +360,7 @@ export default {
 
         if (this.$refs.MapPanel[action.function])
         {
-          this.$refs.MapPanel[action.function](action.params); 
+          this.$refs.MapPanel[action.function](action.props); 
           return;
         } 
 
@@ -438,7 +372,7 @@ export default {
 
     
 
-    Do_About () {
+    Do_HelpAbout () {
       this.aboutDialog = true;
     },
 
@@ -504,74 +438,25 @@ export default {
   overflow-y: auto;
 }
 
-/* .diagTree {
-  font-size: 9px;
-  padding-top: 0px
-}
-*/
-
-/* list of menu items at any level */
-.flyout-nav ul {
-  margin: 0;
-  padding: 0;
-  position: absolute;
-  display: none;
-  list-style-type: none;
-}
-
-/* a menu item */
-.flyout-nav li {
-  position: relative;
-  display: block;
-}
-
-/* show the next level drop-down on
-the right at the same height */
-.flyout-nav :hover > ul {
-  display: block;
-  top: 0;
-  left: 100%;
-}
-
-/* overrides for first-level behavior (horizontal bar) */
-.flyout-nav > ul {
-  display: flex;
-  flex-flow: row nowrap;
-  justify-content: flex-start;
-  align-items: stretch;
-}
-
-.flyout-nav > ul > li:hover > ul {
-  top: 100%;
-  left: 0;
-}
-
-.flyout-nav li a {
-  text-decoration: none;
-  color: var(--menu-text-color);
-  position: relative;
-  display: table;
-  width: 100%;
-}
-
-.flyout-nav li a .label, .shortcut {
-  display: table-cell;
-  padding: var(--menu-content-padding);
-}
-
-.flyout-nav li a .shortcut {
-  text-align: right;
-  color: var(--menu-shortcut-color);
-}
-
-.flyout-nav li a .label {
-  cursor: pointer;
-}
 
 
 </style>
 
 <style>
+
+/* Custom styles to allow for MenuFlyout */
+.v-app-bar {
+  z-index: 999;
+  
+}
+
+.v-toolbar__content {
+  padding:0 !important;
+  height: 0px !important;
+}
+
+/* Custom styles for v-treeview */
+
 #diagTree .v-treeview-node__root {
   font-size: 12px;
   line-height: 1.1;
